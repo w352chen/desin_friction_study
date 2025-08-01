@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SketchBug Embedded Task</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    iframe {
+      border: none;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .task-popup {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 280px;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .task-header {
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .toggle-icon {
+      transition: transform 0.3s ease;
+    }
+
+    .task-description {
+      flex-grow: 1;
+    }
+
+    .next-button {
+      align-self: flex-end;
+      font-size: 20px;
+      background: none;
+      border: none;
+      color: #007BFF;
+      cursor: pointer;
+      padding: 0;
+      margin-top: 8px;
+    }
+
+    .next-button:hover {
+      color: #0056b3;
+    }
+
+    .rating-scale {
+      margin-top: 10px;
+    }
+
+    .rating-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .radio-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 0 4px;
+    }
+
+    .radio-group input[type="radio"] {
+      appearance: none;
+      background-color: #eee;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .radio-group input[type="radio"]:checked {
+      background-color: #007BFF;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fullscreen SketchBug interface -->
+  <iframe src="https://sketchbug.onrender.com"></iframe>
+
+  <!-- Floating task bar -->
+  <div class="task-popup" id="popup">
+    <div class="task-description" id="popupContent">
+      <div class="task-header">
+        Task:
+      </div>
+      <ol style="padding-left: 18px; margin-top: 0;">
+        <li>Switch to <strong>file5.py</strong>.</li>
+        <li>
+          Set a breakpoint at the first line inside <code>apply_until()</code>:
+          <ul>
+            <li><code>value = initial</code></li>
+          </ul>
+        </li>
+      
+        <li>
+          Use <strong>Continue</strong> to run the program until it hits the breakpoint. Then answer:
+          <ul>
+            <li>What is the value of <code>initial</code>?</li>
+            <li>What functions were passed as <code>stop_fn</code> and <code>update_fn</code>?</li>
+            <li>What is the initial value of <code>value</code>?</li>
+          </ul>
+        </li>
+      
+        <li>
+          Use <strong>Step Over</strong> to go to the next line:
+          <ul>
+            <li><code>while not stop_fn(value):</code></li>
+            <li>What condition is being checked?</li>
+            <li>Does the loop begin execution?</li>
+          </ul>
+        </li>
+      
+        <li>
+          Use <strong>Step Into</strong> when <code>update_fn(value)</code> is called. Then answer:
+          <ul>
+            <li>Which function is entered?</li>
+            <li>What argument is passed in?</li>
+            <li>What value is returned?</li>
+          </ul>
+        </li>
+      
+        <li>
+          Use <strong>Step Out</strong> to return from the function back to <code>apply_until()</code>. Then answer:
+          <ul>
+            <li>Which line did you return to?</li>
+          </ul>
+        </li>
+      
+        <li>
+          Repeat using <strong>Step Over</strong> through the loop body multiple times. Then answer:
+          <ul>
+            <li>What are the updated values of <code>value</code> each time?</li>
+            <li>When does the loop exit?</li>
+          </ul>
+        </li>
+      
+        <li>
+          Use <strong>Stop</strong> or <strong>Continue</strong> to finish execution. Then answer:
+          <ul>
+            <li>What is the final returned value?</li>
+            <li>How many iterations did it take?</li>
+          </ul>
+        </li>      
+      </ol>
+    </div>
+    <button class="next-button" onclick="showFollowup()">→</button>
+  </div>
+
+  <script>
+    function showFollowup() {
+      const content = document.getElementById("popupContent");
+      content.innerHTML = `
+        <div class="task-header">Instructions</div>
+        <div>
+          <p><strong>How successful were you in accomplishing these tasks?</strong></p>
+          <div class="rating-scale">
+            <div class="rating-labels">
+              <span>Unsuccessful</span>
+              <span>Successful</span>
+            </div>
+            <div class="radio-group">
+              <input type="radio" name="success" value="1">
+              <input type="radio" name="success" value="2">
+              <input type="radio" name="success" value="3">
+              <input type="radio" name="success" value="4">
+              <input type="radio" name="success" value="5">
+            </div>
+          </div>
+        </div>
+      `;
+      const btn = document.querySelector('.next-button');
+      btn.onclick = () => window.location.href = 'https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_3sEhxMWWAWKIXGK';
+    }
+  </script>
+
+</body>
+</html>
+
+
+
+
