@@ -316,16 +316,9 @@
 
     <div class="download-section">
       <h3>📥 Download Your Data</h3>
-      <p>Your task completion data has been collected. You can download it below:</p>
-      <div id="downloadButtons" style="opacity: 0.5; pointer-events: none;">
-        <button class="btn btn-download" onclick="downloadCSV()">📄 Download CSV File</button>
-        <button class="btn btn-download" onclick="downloadJSON()">📋 Download JSON File</button>
-      </div>
-      <p class="warning-text" id="downloadWarning">
-        ⚠️ Please complete the NASA-TLX assessment above before downloading your data.
-      </p>
+      <p>Your task completion data has been collected. After submitting NASA-TLX, you will be redirected to the main page where you can download your data via the "⬇️ Download CSV" link.</p>
       <div style="background: #e8f5e8; border: 1px solid #4caf50; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.9em;">
-        <strong>✅ Data Isolation Guaranteed:</strong> This CSV file contains ONLY your data from this session. 
+        <strong>✅ Data Isolation Guaranteed:</strong> Your CSV file will contain ONLY your data from this session. 
         No previous participant data is included.
       </div>
     </div>
@@ -618,18 +611,13 @@
         performance, effort, frustration, overallWorkload
       });
 
-      // Hide form and show completion message
-      document.getElementById('nasaTlxForm').style.display = 'none';
-      document.getElementById('tlxCompleted').style.display = 'block';
-
-      // Enable download buttons
-      const downloadButtons = document.getElementById('downloadButtons');
-      downloadButtons.style.opacity = '1';
-      downloadButtons.style.pointerEvents = 'auto';
+      // Mark that participant has completed the study
+      localStorage.setItem('study_completion_accessed', new Date().toISOString());
       
-      document.getElementById('downloadWarning').innerHTML = 
-        '✅ NASA-TLX completed! You can now download your data.';
-      document.getElementById('downloadWarning').style.color = '#28a745';
+      console.log('NASA-TLX submitted, redirecting to main page');
+      
+      // Directly redirect to index.html after NASA-TLX submission
+      window.location.href = 'index.html';
     }
 
     function editNasaTlx() {
@@ -657,17 +645,36 @@
     function checkNasaTlxStatus() {
       const tlxCompleted = localStorage.getItem('nasa_tlx_completed');
       if (tlxCompleted) {
+        console.log('NASA-TLX already completed, showing download options');
+        
+        // Hide NASA-TLX form and show completion message
         document.getElementById('nasaTlxForm').style.display = 'none';
         document.getElementById('tlxCompleted').style.display = 'block';
         
-        // Enable download buttons
-        const downloadButtons = document.getElementById('downloadButtons');
-        downloadButtons.style.opacity = '1';
-        downloadButtons.style.pointerEvents = 'auto';
+        // Show download section as ready to use
+        const downloadSection = document.querySelector('.download-section');
+        downloadSection.innerHTML = `
+          <h3>📥 Download Your Data</h3>
+          <p>NASA-TLX assessment is completed. You can download your complete study data:</p>
+          <div style="margin: 20px 0;">
+            <button class="btn btn-download" onclick="downloadCSV()">📄 Download CSV File</button>
+            <button class="btn btn-download" onclick="downloadJSON()">📋 Download JSON File</button>
+          </div>
+          <div style="background: #e8f5e8; border: 1px solid #4caf50; padding: 15px; border-radius: 6px; font-size: 0.9em;">
+            <strong>✅ Data Isolation Guaranteed:</strong> This CSV file contains ONLY your data from this session. 
+            No previous participant data is included.
+          </div>
+        `;
         
-        document.getElementById('downloadWarning').innerHTML = 
-          '✅ NASA-TLX completed! You can now download your data.';
-        document.getElementById('downloadWarning').style.color = '#28a745';
+        // Update next steps section
+        const nextSteps = document.querySelector('.next-steps');
+        nextSteps.innerHTML = `
+          <h3>All Done!</h3>
+          <p>You have completed all study tasks and assessments. You can download your data above or return to the main page:</p>
+          <button class="btn btn-success" onclick="returnToIndex()">
+            🏠 Return to Main Page
+          </button>
+        `;
       }
     }
 
@@ -676,25 +683,29 @@
       updateSummary();
       checkNasaTlxStatus();
       
-      // Optional: Auto-redirect after 5 minutes if participant doesn't proceed
-      let timeLeft = 300; // 5 minutes in seconds
-      const countdownElement = document.getElementById('countdown');
-      
-      function updateCountdown() {
-        if (timeLeft > 0) {
-          const minutes = Math.floor(timeLeft / 60);
-          const seconds = timeLeft % 60;
-          countdownElement.textContent = `Auto-redirect in ${minutes}:${seconds.toString().padStart(2, '0')}`;
-          timeLeft--;
-        } else {
-          countdownElement.textContent = 'Redirecting now...';
-          returnToIndex();
+      // Only start countdown if NASA-TLX is not yet completed
+      const tlxCompleted = localStorage.getItem('nasa_tlx_completed');
+      if (!tlxCompleted) {
+        // Optional: Auto-redirect after 5 minutes if participant doesn't proceed
+        let timeLeft = 300; // 5 minutes in seconds
+        const countdownElement = document.getElementById('countdown');
+        
+        function updateCountdown() {
+          if (timeLeft > 0) {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            countdownElement.textContent = `Auto-redirect in ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            timeLeft--;
+          } else {
+            countdownElement.textContent = 'Redirecting now...';
+            returnToIndex();
+          }
         }
+        
+        // Start countdown
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
       }
-      
-      // Start countdown
-      updateCountdown();
-      setInterval(updateCountdown, 1000);
     });
   </script>
 </body>

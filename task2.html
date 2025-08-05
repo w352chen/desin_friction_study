@@ -121,7 +121,7 @@
         </li>
       
         <li>
-          Use <strong>Continue</strong> to run the program until it hits the breakpoint. Then answer:
+          Run the program until it hits the breakpoint. Then answer:
           <ul>
             <li>What is the value of <code>initial</code>?</li>
             <li>What functions were passed as <code>stop_fn</code> and <code>update_fn</code>?</li>
@@ -130,44 +130,48 @@
         </li>
       
         <li>
-          Use <strong>Step Over</strong> to go to the next line:
+          Restart the debugger, <strong>Step Over</strong> until you hit the loop guard for the second time:
           <ul>
-            <li><code>while not stop_fn(value):</code></li>
-            <li>What condition is being checked?</li>
-            <li>Does the loop begin execution?</li>
+            <!-- <li><code>while not stop_fn(value):</code></li>
+            <li>What condition is being checked?</li> -->
+            <li>What is the new value of value? </li>
+            <!-- <li>Which function updated it?</li> -->
           </ul>
         </li>
-      
         <li>
+          When value = 63, step into it.
+          <ul>
+            <li>What is the function name?</li>
+            <li>What is the input and the return value?</li>
+          </ul> 
+        </li>
+      
+        <!-- <li>
           Use <strong>Step Into</strong> when <code>update_fn(value)</code> is called. Then answer:
           <ul>
             <li>Which function is entered?</li>
             <li>What argument is passed in?</li>
             <li>What value is returned?</li>
           </ul>
-        </li>
+        </li> -->
       
-        <li>
+        <!-- <li>
           Use <strong>Step Out</strong> to return from the function back to <code>apply_until()</code>. Then answer:
           <ul>
             <li>Which line did you return to?</li>
           </ul>
-        </li>
+        </li> -->
       
-        <li>
+        <!-- <li>
           Repeat using <strong>Step Over</strong> through the loop body multiple times. Then answer:
           <ul>
             <li>What are the updated values of <code>value</code> each time?</li>
             <li>When does the loop exit?</li>
           </ul>
-        </li>
+        </li> -->
       
         <li>
-          Use <strong>Stop</strong> or <strong>Continue</strong> to finish execution. Then answer:
-          <ul>
-            <li>What is the final returned value?</li>
-            <li>How many iterations did it take?</li>
-          </ul>
+          What is the return value of the apply_until call?
         </li>      
       </ol>
     </div>
