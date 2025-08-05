@@ -112,10 +112,10 @@
         Task:
       </div>
       <ol style="padding-left: 18px; margin-top: 0;">
-        <li>Switch to <strong>file2.py</strong>.</li>
-        <li>Set breakpoints at lines <strong>17</strong>.</li>
-        <li>Start the debugger.</li>
-        <li>Use “Step Over” repeatedly until the debugger hits line 17 again.</li>
+        <li>Stay in <strong>file1.py</strong>.</li>
+        <li>Set breakpoints at lines <strong>19</strong>.</li>
+        <!-- <li>Start the debugger.</li> -->
+        <li>What does the variable panel look like when num = 97?</li>
         <li>Stop the debugger.</li>
       </ol>
     </div>
@@ -123,6 +123,11 @@
   </div>
 
   <script>
+    // Record task start time
+    let taskStartTime = new Date();
+    console.log('Step Over Stop Task 2 start time:', taskStartTime.toISOString());
+    localStorage.setItem('stepover_stop_task2_start_time', taskStartTime.toISOString());
+
     function showFollowup() {
       const content = document.getElementById("popupContent");
       content.innerHTML = `
@@ -145,7 +150,26 @@
         </div>
       `;
       const btn = document.querySelector('.next-button');
-      btn.onclick = () => window.location.href = 'task2.html';
+      btn.onclick = () => {
+        const selectedRating = document.querySelector('input[name="success"]:checked');
+        if (!selectedRating) {
+          alert('Please select a rating before continuing');
+          return;
+        }
+        
+        const taskEndTime = new Date();
+        const taskDuration = (taskEndTime - taskStartTime) / 1000;
+        
+        console.log('Step Over Stop Task 2 end time:', taskEndTime.toISOString());
+        console.log('Step Over Stop Task 2 duration:', taskDuration, 'seconds');
+        console.log('Step Over Stop Task 2 rating:', selectedRating.value);
+        
+        localStorage.setItem('stepover_stop_task2_end_time', taskEndTime.toISOString());
+        localStorage.setItem('stepover_stop_task2_duration_seconds', taskDuration.toString());
+        localStorage.setItem('stepover_stop_task2_rating', selectedRating.value);
+        
+        window.location.href = 'task2.html';
+      };
     }
   </script>
 

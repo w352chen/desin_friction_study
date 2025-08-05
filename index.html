@@ -19,6 +19,69 @@
       margin-bottom: 40px;
     }
 
+    .participant-form {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+      text-align: center;
+      min-width: 400px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #007BFF;
+    }
+
+    .btn {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+    }
+
+    .btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .study-links {
+      display: none;
+    }
+
+    .study-links.show {
+      display: block;
+    }
+
     ul {
       list-style: none;
       padding: 0;
@@ -38,24 +101,221 @@
     a:hover {
       color: #0056b3;
     }
+
+    .participant-info {
+      background: #e8f5e8;
+      border: 1px solid #4caf50;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .change-id {
+      background: none;
+      border: none;
+      color: #007BFF;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
 
   <h1>Welcome to the SketchBug Study</h1>
 
-  <ul>
-    <li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_emOP8hXwSR2lF2e" target="_blank">📋 Pre-Questionnaire</a></li>
-    <!-- <li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_emOP8hXwSR2lF2e" target="_blank">📝 Pre-Survey</a></li> -->
-    <li><a href="tutorial_keyboard_break_start.html" target="_blank">📖 Keyboard Mode</a></li>
-    <!-- <li><a href="https://sketchbug.onrender.com/" target="_blank">🧩 Task 1</a></li> -->
-    <!-- <li><a href="task1.html" target="_blank">🧩 Task 1</a></li> -->
-    <!-- <li><a href="https://sketchbug.onrender.com/" target="_blank">🧩 Task 2</a></li> -->
-    <li><a href="tutorial_sketch_break_start.html" target="_blank">📖 Sketch Mode</a></li>
-    <!-- <li><a href="https://sketchbug.onrender.com/" target="_blank">🧩 Task 1</a></li> -->
-    <!-- <li><a href="https://sketchbug.onrender.com/" target="_blank">🧩 Task 2</a></li> -->
-    <!-- <li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_a4ydJWKo7mNze9E" target="_blank">📝 Post-Survey</a></li> -->
-  </ul>
+  <!-- Participant ID Form -->
+  <div id="participantForm" class="participant-form">
+    <!-- <h2>Please Enter Your Participant ID</h2> -->
+    <div class="form-group">
+      <!-- <label for="participantId">Participant ID:</label> -->
+      <input type="text" id="participantId" placeholder="Enter your participant ID" required>
+    </div>
+    <button class="btn" onclick="setParticipantId()">Continue</button>
+  </div>
+
+  <!-- Study Links (hidden initially) -->
+  <div id="studyLinks" class="study-links">
+    <div class="participant-info">
+      <strong>Participant ID:</strong> <span id="displayParticipantId"></span>
+      <button class="change-id" onclick="changeParticipantId()">Change ID</button>
+    </div>
+
+    <ul>
+      <li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_emOP8hXwSR2lF2e" target="_blank">📋 Pre-Questionnaire</a></li>
+      <!-- <li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_emOP8hXwSR2lF2e" target="_blank">📝 Pre-Survey</a></li> -->
+      <li><a href="tutorial_keyboard_break_start.html" target="_blank">📖 Keyboard Mode</a></li>
+      <!-- <li><a href="https://sketchbug.onrender.com/" target="_blank">🧩 Task 1</a></li> -->
+      <!-- <li><a href="task1.html" target="_blank">🧩 Task 1</a></li> -->
+      <!-- <li><a href="https://sketchbug.onrender.com/" target="_blank">🧩 Task 2</a></li> -->
+      <li><a href="tutorial_sketch_break_start.html" target="_blank">📖 Sketch Mode</a></li>
+      <!-- <li><a href="https://sketchbug.onrender.com/" target="_blank">🧩 Task 1</a></li> -->
+      <!-- <li><a href="https://sketchbug.onrender.com/" target="_blank">🧩 Task 2</a></li> -->
+      <!-- <li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_a4ydJWKo7mNze9E" target="_blank">📝 Post-Survey</a></li> -->
+      <li><a href="study_complete.html" target="_blank">⬇️ Download CSV</a></li>
+      <li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_bjszlKhvhbGYpRI" target="_blank">📋 Post-Questionnaire</a></li>
+    </ul>
+  </div>
+
+  <script>
+    // Check if participant ID is already stored
+    document.addEventListener('DOMContentLoaded', function() {
+      const storedId = localStorage.getItem('participant_id');
+      if (storedId) {
+        showStudyLinks(storedId);
+      }
+    });
+
+    function setParticipantId() {
+      const participantId = document.getElementById('participantId').value.trim();
+      
+      if (!participantId) {
+        alert('Please enter a participant ID');
+        return;
+      }
+
+      // Clear ALL previous participant data to ensure clean slate
+      clearAllParticipantData();
+
+      // Store new participant ID in localStorage
+      localStorage.setItem('participant_id', participantId);
+      localStorage.setItem('participant_start_time', new Date().toISOString());
+      
+      console.log('New participant session started:', participantId);
+      console.log('All previous data cleared for clean session');
+      showStudyLinks(participantId);
+    }
+
+    function clearAllParticipantData() {
+      // List of all possible data keys to clear
+      const dataKeys = [
+        // Participant info
+        'participant_id',
+        'participant_start_time',
+        
+        // Task data
+        'stepover_stop_task1_start_time',
+        'stepover_stop_task1_end_time',
+        'stepover_stop_task1_duration_seconds',
+        'stepover_stop_task1_rating',
+        
+        'breakpoint_start_task_start_time',
+        'breakpoint_start_task_end_time',
+        'breakpoint_start_task_duration_seconds',
+        'breakpoint_start_task_rating',
+        
+        'continue_task_start_time',
+        'continue_task_end_time',
+        'continue_task_duration_seconds',
+        'continue_task_rating',
+        
+        'stepinto_task_start_time',
+        'stepinto_task_end_time',
+        'stepinto_task_duration_seconds',
+        'stepinto_task_rating',
+        
+        'stepout_task_start_time',
+        'stepout_task_end_time',
+        'stepout_task_duration_seconds',
+        'stepout_task_rating',
+        
+        'task1_start_time',
+        'task1_end_time',
+        'task1_duration_seconds',
+        'task1_rating',
+        
+        'breakpoint_start_task2_start_time',
+        'breakpoint_start_task2_end_time',
+        'breakpoint_start_task2_duration_seconds',
+        'breakpoint_start_task2_rating',
+        
+        'continue_task2_start_time',
+        'continue_task2_end_time',
+        'continue_task2_duration_seconds',
+        'continue_task2_rating',
+        
+        'stepinto_task2_start_time',
+        'stepinto_task2_end_time',
+        'stepinto_task2_duration_seconds',
+        'stepinto_task2_rating',
+        
+        'stepout_task2_start_time',
+        'stepout_task2_end_time',
+        'stepout_task2_duration_seconds',
+        'stepout_task2_rating',
+        
+        'stepover_stop_task2_start_time',
+        'stepover_stop_task2_end_time',
+        'stepover_stop_task2_duration_seconds',
+        'stepover_stop_task2_rating',
+        
+        'task2_start_time',
+        'task2_end_time',
+        'task2_duration_seconds',
+        'task2_rating',
+        
+        // NASA-TLX data
+        'nasa_tlx_mental_demand',
+        'nasa_tlx_physical_demand',
+        'nasa_tlx_temporal_demand',
+        'nasa_tlx_performance',
+        'nasa_tlx_effort',
+        'nasa_tlx_frustration',
+        'nasa_tlx_overall_workload',
+        'nasa_tlx_completed',
+        
+        // Study completion tracking
+        'study_completion_accessed'
+      ];
+
+      // Clear all participant data
+      dataKeys.forEach(key => {
+        localStorage.removeItem(key);
+      });
+
+      console.log('Cleared all participant data keys:', dataKeys.length, 'items');
+    }
+
+    function showStudyLinks(participantId) {
+      document.getElementById('participantForm').style.display = 'none';
+      document.getElementById('studyLinks').classList.add('show');
+      document.getElementById('displayParticipantId').textContent = participantId;
+    }
+
+    function changeParticipantId() {
+      const currentId = localStorage.getItem('participant_id');
+      const hasData = checkIfHasAnyData();
+      
+      let confirmMessage = 'Are you sure you want to change the participant ID?';
+      if (hasData) {
+        confirmMessage += '\n\n⚠️ WARNING: This will clear ALL existing study data for the current participant (' + currentId + ').\n\nThis action cannot be undone!';
+      }
+      
+      if (confirm(confirmMessage)) {
+        document.getElementById('participantForm').style.display = 'block';
+        document.getElementById('studyLinks').classList.remove('show');
+        document.getElementById('participantId').value = '';
+        document.getElementById('participantId').focus();
+        
+        if (hasData) {
+          console.log('User confirmed changing participant ID - data will be cleared when new ID is set');
+        }
+      }
+    }
+
+    function checkIfHasAnyData() {
+      // Check if any task data exists
+      const taskKeys = [
+        'task1_start_time', 'task2_start_time',
+        'stepover_stop_task1_start_time', 'breakpoint_start_task_start_time',
+        'continue_task_start_time', 'stepinto_task_start_time',
+        'stepout_task_start_time', 'nasa_tlx_completed'
+      ];
+      
+      return taskKeys.some(key => localStorage.getItem(key) !== null);
+    }
+  </script>
 
 </body>
 </html>

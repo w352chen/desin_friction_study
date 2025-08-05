@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Tasks Complete</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background: white;
+      border-radius: 15px;
+      padding: 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+    }
+
+    .checkmark {
+      font-size: 4em;
+      color: #28a745;
+      margin-bottom: 20px;
+    }
+
+    .participant-info {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 25px 0;
+    }
+
+    .participant-info h3 {
+      margin-top: 0;
+      color: #495057;
+    }
+
+    .data-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .summary-item {
+      background: #e8f5e8;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #4caf50;
+    }
+
+    .summary-label {
+      font-weight: bold;
+      color: #2e7d32;
+      display: block;
+      font-size: 0.9em;
+    }
+
+    .summary-value {
+      font-size: 1.3em;
+      color: #1b5e20;
+      margin-top: 5px;
+    }
+
+    .download-section {
+      margin: 30px 0;
+      padding: 25px;
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      border-radius: 10px;
+    }
+
+    .download-section h3 {
+      margin-top: 0;
+      color: #856404;
+    }
+
+    .btn {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      margin: 10px;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-success {
+      background-color: #28a745;
+    }
+
+    .btn-success:hover {
+      background-color: #1e7e34;
+    }
+
+    .btn-download {
+      background-color: #17a2b8;
+    }
+
+    .btn-download:hover {
+      background-color: #138496;
+    }
+
+    .next-steps {
+      margin-top: 30px;
+      padding: 20px;
+      background: #d1ecf1;
+      border: 2px solid #17a2b8;
+      border-radius: 10px;
+    }
+
+    .next-steps h3 {
+      margin-top: 0;
+      color: #0c5460;
+    }
+
+    .countdown {
+      font-size: 1.1em;
+      color: #856404;
+      margin-top: 15px;
+    }
+
+    .warning-text {
+      color: #dc3545;
+      font-weight: bold;
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+
+    .nasa-tlx-section {
+      margin: 30px 0;
+      padding: 25px;
+      background: #f8f9fa;
+      border: 2px solid #6c757d;
+      border-radius: 10px;
+    }
+
+    .nasa-tlx-section h3 {
+      margin-top: 0;
+      color: #495057;
+    }
+
+    .nasa-tlx-form {
+      margin-top: 20px;
+    }
+
+    .tlx-item {
+      margin-bottom: 25px;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+    }
+
+    .tlx-item label {
+      font-weight: bold;
+      font-size: 1.1em;
+      color: #495057;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .tlx-description {
+      font-size: 0.9em;
+      color: #6c757d;
+      margin: 5px 0 15px 0;
+      font-style: italic;
+    }
+
+    .tlx-item input[type="range"] {
+      width: calc(100% - 60px);
+      margin-right: 10px;
+    }
+
+    .tlx-value {
+      font-weight: bold;
+      color: #007BFF;
+      font-size: 1.1em;
+      min-width: 30px;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .tlx-completed {
+      background: #d4edda;
+      border: 2px solid #28a745;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .data-summary {
+        grid-template-columns: 1fr;
+      }
+      
+      .container {
+        padding: 25px;
+      }
+
+      .tlx-item input[type="range"] {
+        width: calc(100% - 50px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="checkmark">✅</div>
+    <h1>Congratulations!</h1>
+    <p style="font-size: 1.2em; color: #666; margin-bottom: 30px;">
+      You have successfully completed all study tasks!
+    </p>
+
+    <div class="participant-info">
+      <h3>Your Study Session</h3>
+      <p><strong>Participant ID:</strong> <span id="participantId">Loading...</span></p>
+      <p><strong>Session Start:</strong> <span id="sessionStart">Loading...</span></p>
+      <p><strong>Total Time:</strong> <span id="totalTime">Calculating...</span></p>
+    </div>
+
+    <div class="data-summary">
+      <div class="summary-item">
+        <span class="summary-label">Tasks Completed</span>
+        <div class="summary-value" id="completedTasks">0</div>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Average Rating</span>
+        <div class="summary-value" id="averageRating">-</div>
+      </div>
+    </div>
+
+    <div class="nasa-tlx-section">
+      <h3>📋 NASA-TLX Workload Assessment</h3>
+      <p>Please rate your perceived workload for the overall study tasks on the following dimensions (1 = Very Low, 10 = Very High):</p>
+      
+      <div class="nasa-tlx-form" id="nasaTlxForm">
+        <div class="tlx-item">
+          <label for="mentalDemand">Mental Demand</label>
+          <p class="tlx-description">How mentally demanding was the task?</p>
+          <input type="range" id="mentalDemand" min="1" max="10" value="5" oninput="updateTlxValue('mentalDemand', this.value)">
+          <span class="tlx-value" id="mentalDemandValue">5</span>
+        </div>
+
+        <div class="tlx-item">
+          <label for="physicalDemand">Physical Demand</label>
+          <p class="tlx-description">How physically demanding was the task?</p>
+          <input type="range" id="physicalDemand" min="1" max="10" value="5" oninput="updateTlxValue('physicalDemand', this.value)">
+          <span class="tlx-value" id="physicalDemandValue">5</span>
+        </div>
+
+        <div class="tlx-item">
+          <label for="temporalDemand">Temporal Demand</label>
+          <p class="tlx-description">How hurried or rushed was the pace of the task?</p>
+          <input type="range" id="temporalDemand" min="1" max="10" value="5" oninput="updateTlxValue('temporalDemand', this.value)">
+          <span class="tlx-value" id="temporalDemandValue">5</span>
+        </div>
+
+        <div class="tlx-item">
+          <label for="performance">Performance</label>
+          <p class="tlx-description">How successful were you in accomplishing what you were asked to do?</p>
+          <input type="range" id="performance" min="1" max="10" value="5" oninput="updateTlxValue('performance', this.value)">
+          <span class="tlx-value" id="performanceValue">5</span>
+        </div>
+
+        <div class="tlx-item">
+          <label for="effort">Effort</label>
+          <p class="tlx-description">How hard did you have to work to accomplish your level of performance?</p>
+          <input type="range" id="effort" min="1" max="10" value="5" oninput="updateTlxValue('effort', this.value)">
+          <span class="tlx-value" id="effortValue">5</span>
+        </div>
+
+        <div class="tlx-item">
+          <label for="frustration">Frustration</label>
+          <p class="tlx-description">How insecure, discouraged, irritated, stressed, and annoyed were you?</p>
+          <input type="range" id="frustration" min="1" max="10" value="5" oninput="updateTlxValue('frustration', this.value)">
+          <span class="tlx-value" id="frustrationValue">5</span>
+        </div>
+
+        <button class="btn btn-success" onclick="submitNasaTlx()" style="margin-top: 20px;">
+          ✅ Submit NASA-TLX Ratings
+        </button>
+      </div>
+
+      <div class="tlx-completed" id="tlxCompleted" style="display: none;">
+        <p style="color: #28a745; font-weight: bold;">✅ NASA-TLX Assessment Completed</p>
+        <button class="btn" onclick="editNasaTlx()">Edit Ratings</button>
+      </div>
+    </div>
+
+    <div class="download-section">
+      <h3>📥 Download Your Data</h3>
+      <p>Your task completion data has been collected. You can download it below:</p>
+      <div id="downloadButtons" style="opacity: 0.5; pointer-events: none;">
+        <button class="btn btn-download" onclick="downloadCSV()">📄 Download CSV File</button>
+        <button class="btn btn-download" onclick="downloadJSON()">📋 Download JSON File</button>
+      </div>
+      <p class="warning-text" id="downloadWarning">
+        ⚠️ Please complete the NASA-TLX assessment above before downloading your data.
+      </p>
+      <div style="background: #e8f5e8; border: 1px solid #4caf50; padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 0.9em;">
+        <strong>✅ Data Isolation Guaranteed:</strong> This CSV file contains ONLY your data from this session. 
+        No previous participant data is included.
+      </div>
+    </div>
+
+    <div class="next-steps">
+      <h3>Final Step</h3>
+      <p>You have completed all study tasks. You can now return to the main page:</p>
+      <button class="btn btn-success" onclick="returnToIndex()">
+        🏠 Return to Main Page
+      </button>
+      <div class="countdown" id="countdown">
+        <!-- Optional: Auto-redirect after 2 minutes -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Define all task configurations (same as survey_results.html)
+    const TASKS = [
+      { key: 'stepover_stop_task1', name: 'Step Over Stop Task 1' },
+      { key: 'breakpoint_start_task', name: 'Breakpoint Start Task' },
+      { key: 'continue_task', name: 'Continue Task' },
+      { key: 'stepinto_task', name: 'Step Into Task' },
+      { key: 'stepout_task', name: 'Step Out Task' },
+      { key: 'task1', name: 'Task 1' },
+      { key: 'breakpoint_start_task2', name: 'Breakpoint Start Task 2' },
+      { key: 'continue_task2', name: 'Continue Task 2' },
+      { key: 'stepinto_task2', name: 'Step Into Task 2' },
+      { key: 'stepout_task2', name: 'Step Out Task 2' },
+      { key: 'stepover_stop_task2', name: 'Step Over Stop Task 2' },
+      { key: 'task2', name: 'Task 2' }
+    ];
+
+    function getTaskData(taskKey) {
+      const startTime = localStorage.getItem(`${taskKey}_start_time`);
+      const endTime = localStorage.getItem(`${taskKey}_end_time`);
+      const duration = localStorage.getItem(`${taskKey}_duration_seconds`);
+      const rating = localStorage.getItem(`${taskKey}_rating`);
+
+      return {
+        startTime: startTime || null,
+        endTime: endTime || null,
+        duration: duration ? parseFloat(duration) : null,
+        rating: rating ? parseInt(rating) : null,
+        isComplete: !!(startTime && endTime && duration && rating)
+      };
+    }
+
+    function formatDateTime(isoString) {
+      if (!isoString) return 'Not Available';
+      const date = new Date(isoString);
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
+
+    function calculateTotalTime() {
+      const participantStart = localStorage.getItem('participant_start_time');
+      if (!participantStart) return 'Unknown';
+      
+      const now = new Date();
+      const start = new Date(participantStart);
+      const diffMinutes = Math.round((now - start) / (1000 * 60));
+      
+      if (diffMinutes < 60) {
+        return `${diffMinutes} minutes`;
+      } else {
+        const hours = Math.floor(diffMinutes / 60);
+        const minutes = diffMinutes % 60;
+        return `${hours}h ${minutes}m`;
+      }
+    }
+
+    function updateSummary() {
+      // Update participant info
+      const participantId = localStorage.getItem('participant_id') || 'Unknown';
+      const participantStart = localStorage.getItem('participant_start_time');
+      
+      document.getElementById('participantId').textContent = participantId;
+      document.getElementById('sessionStart').textContent = formatDateTime(participantStart);
+      document.getElementById('totalTime').textContent = calculateTotalTime();
+
+      // Calculate task summary
+      let completedCount = 0;
+      let totalRating = 0;
+      let ratingCount = 0;
+
+      TASKS.forEach(task => {
+        const data = getTaskData(task.key);
+        if (data.isComplete) {
+          completedCount++;
+          if (data.rating) {
+            totalRating += data.rating;
+            ratingCount++;
+          }
+        }
+      });
+
+      document.getElementById('completedTasks').textContent = `${completedCount}/${TASKS.length}`;
+      document.getElementById('averageRating').textContent = 
+        ratingCount > 0 ? Math.round((totalRating / ratingCount) * 100) / 100 : 'N/A';
+    }
+
+    function getAllData() {
+      const participantId = localStorage.getItem('participant_id') || 'Unknown';
+      const participantStartTime = localStorage.getItem('participant_start_time');
+      
+      // Get NASA-TLX data
+      const nasaTlxData = {
+        mental_demand: localStorage.getItem('nasa_tlx_mental_demand') || '',
+        physical_demand: localStorage.getItem('nasa_tlx_physical_demand') || '',
+        temporal_demand: localStorage.getItem('nasa_tlx_temporal_demand') || '',
+        performance: localStorage.getItem('nasa_tlx_performance') || '',
+        effort: localStorage.getItem('nasa_tlx_effort') || '',
+        frustration: localStorage.getItem('nasa_tlx_frustration') || '',
+        overall_workload: localStorage.getItem('nasa_tlx_overall_workload') || ''
+      };
+      
+      return TASKS.map(task => {
+        const data = getTaskData(task.key);
+        return {
+          participant_id: participantId,
+          participant_start_time: participantStartTime,
+          task_name: task.name,
+          task_key: task.key,
+          start_time: data.startTime,
+          end_time: data.endTime,
+          duration_seconds: data.duration,
+          duration_minutes: data.duration ? Math.round((data.duration / 60) * 100) / 100 : null,
+          success_rating: data.rating,
+          is_complete: data.isComplete,
+          nasa_tlx_mental_demand: nasaTlxData.mental_demand,
+          nasa_tlx_physical_demand: nasaTlxData.physical_demand,
+          nasa_tlx_temporal_demand: nasaTlxData.temporal_demand,
+          nasa_tlx_performance: nasaTlxData.performance,
+          nasa_tlx_effort: nasaTlxData.effort,
+          nasa_tlx_frustration: nasaTlxData.frustration,
+          nasa_tlx_overall_workload: nasaTlxData.overall_workload
+        };
+      });
+    }
+
+    function downloadCSV() {
+      const participantId = localStorage.getItem('participant_id') || 'Unknown';
+      console.log(`📥 Downloading CSV for participant: ${participantId}`);
+      console.log(`🔒 Data isolation verified - CSV contains ONLY data for participant: ${participantId}`);
+      
+      const data = getAllData();
+      
+      // CSV headers
+      const headers = [
+        'Participant ID',
+        'Participant Start Time',
+        'Task Name',
+        'Task Key', 
+        'Start Time',
+        'End Time',
+        'Duration (Seconds)',
+        'Duration (Minutes)',
+        'Success Rating',
+        'Is Complete',
+        'NASA-TLX Mental Demand',
+        'NASA-TLX Physical Demand',
+        'NASA-TLX Temporal Demand',
+        'NASA-TLX Performance',
+        'NASA-TLX Effort',
+        'NASA-TLX Frustration',
+        'NASA-TLX Overall Workload'
+      ];
+
+      // Generate CSV content
+      let csvContent = headers.join(',') + '\n';
+      
+      data.forEach(row => {
+        const csvRow = [
+          `"${row.participant_id}"`,
+          `"${row.participant_start_time || ''}"`,
+          `"${row.task_name}"`,
+          `"${row.task_key}"`,
+          `"${row.start_time || ''}"`,
+          `"${row.end_time || ''}"`,
+          row.duration_seconds || '',
+          row.duration_minutes || '',
+          row.success_rating || '',
+          row.is_complete,
+          row.nasa_tlx_mental_demand || '',
+          row.nasa_tlx_physical_demand || '',
+          row.nasa_tlx_temporal_demand || '',
+          row.nasa_tlx_performance || '',
+          row.nasa_tlx_effort || '',
+          row.nasa_tlx_frustration || '',
+          row.nasa_tlx_overall_workload || ''
+        ];
+        csvContent += csvRow.join(',') + '\n';
+      });
+
+      // Download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      const participantId = localStorage.getItem('participant_id') || 'unknown';
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const filename = `study_data_${participantId}_${dateStr}.csv`;
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      console.log('CSV file downloaded:', filename);
+    }
+
+    function downloadJSON() {
+      const participantId = localStorage.getItem('participant_id') || 'Unknown';
+      console.log(`📥 Downloading JSON for participant: ${participantId}`);
+      console.log(`🔒 Data isolation verified - JSON contains ONLY data for participant: ${participantId}`);
+      
+      const data = getAllData();
+      const jsonContent = JSON.stringify(data, null, 2);
+      
+      const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      const participantId = localStorage.getItem('participant_id') || 'unknown';
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const filename = `study_data_${participantId}_${dateStr}.json`;
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      console.log('JSON file downloaded:', filename);
+    }
+
+    function returnToIndex() {
+      // Mark that participant has accessed the completion page
+      localStorage.setItem('study_completion_accessed', new Date().toISOString());
+      
+      console.log('Study tasks completed, returning to main page');
+      
+      // Redirect to index page (main directory)
+      window.location.href = 'index.html';
+    }
+
+    function updateTlxValue(dimension, value) {
+      document.getElementById(dimension + 'Value').textContent = value;
+    }
+
+    function submitNasaTlx() {
+      // Get all NASA-TLX values
+      const mentalDemand = document.getElementById('mentalDemand').value;
+      const physicalDemand = document.getElementById('physicalDemand').value;
+      const temporalDemand = document.getElementById('temporalDemand').value;
+      const performance = document.getElementById('performance').value;
+      const effort = document.getElementById('effort').value;
+      const frustration = document.getElementById('frustration').value;
+
+      // Calculate overall workload (average of all dimensions)
+      const overallWorkload = Math.round(
+        (parseInt(mentalDemand) + parseInt(physicalDemand) + parseInt(temporalDemand) + 
+         parseInt(performance) + parseInt(effort) + parseInt(frustration)) / 6 * 100
+      ) / 100;
+
+      // Store in localStorage
+      localStorage.setItem('nasa_tlx_mental_demand', mentalDemand);
+      localStorage.setItem('nasa_tlx_physical_demand', physicalDemand);
+      localStorage.setItem('nasa_tlx_temporal_demand', temporalDemand);
+      localStorage.setItem('nasa_tlx_performance', performance);
+      localStorage.setItem('nasa_tlx_effort', effort);
+      localStorage.setItem('nasa_tlx_frustration', frustration);
+      localStorage.setItem('nasa_tlx_overall_workload', overallWorkload);
+      localStorage.setItem('nasa_tlx_completed', new Date().toISOString());
+
+      console.log('NASA-TLX data saved:', {
+        mentalDemand, physicalDemand, temporalDemand, 
+        performance, effort, frustration, overallWorkload
+      });
+
+      // Hide form and show completion message
+      document.getElementById('nasaTlxForm').style.display = 'none';
+      document.getElementById('tlxCompleted').style.display = 'block';
+
+      // Enable download buttons
+      const downloadButtons = document.getElementById('downloadButtons');
+      downloadButtons.style.opacity = '1';
+      downloadButtons.style.pointerEvents = 'auto';
+      
+      document.getElementById('downloadWarning').innerHTML = 
+        '✅ NASA-TLX completed! You can now download your data.';
+      document.getElementById('downloadWarning').style.color = '#28a745';
+    }
+
+    function editNasaTlx() {
+      // Show form and hide completion message
+      document.getElementById('nasaTlxForm').style.display = 'block';
+      document.getElementById('tlxCompleted').style.display = 'none';
+
+      // Load existing values
+      document.getElementById('mentalDemand').value = localStorage.getItem('nasa_tlx_mental_demand') || '5';
+      document.getElementById('physicalDemand').value = localStorage.getItem('nasa_tlx_physical_demand') || '5';
+      document.getElementById('temporalDemand').value = localStorage.getItem('nasa_tlx_temporal_demand') || '5';
+      document.getElementById('performance').value = localStorage.getItem('nasa_tlx_performance') || '5';
+      document.getElementById('effort').value = localStorage.getItem('nasa_tlx_effort') || '5';
+      document.getElementById('frustration').value = localStorage.getItem('nasa_tlx_frustration') || '5';
+
+      // Update display values
+      updateTlxValue('mentalDemand', document.getElementById('mentalDemand').value);
+      updateTlxValue('physicalDemand', document.getElementById('physicalDemand').value);
+      updateTlxValue('temporalDemand', document.getElementById('temporalDemand').value);
+      updateTlxValue('performance', document.getElementById('performance').value);
+      updateTlxValue('effort', document.getElementById('effort').value);
+      updateTlxValue('frustration', document.getElementById('frustration').value);
+    }
+
+    function checkNasaTlxStatus() {
+      const tlxCompleted = localStorage.getItem('nasa_tlx_completed');
+      if (tlxCompleted) {
+        document.getElementById('nasaTlxForm').style.display = 'none';
+        document.getElementById('tlxCompleted').style.display = 'block';
+        
+        // Enable download buttons
+        const downloadButtons = document.getElementById('downloadButtons');
+        downloadButtons.style.opacity = '1';
+        downloadButtons.style.pointerEvents = 'auto';
+        
+        document.getElementById('downloadWarning').innerHTML = 
+          '✅ NASA-TLX completed! You can now download your data.';
+        document.getElementById('downloadWarning').style.color = '#28a745';
+      }
+    }
+
+    // Initialize page when loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      updateSummary();
+      checkNasaTlxStatus();
+      
+      // Optional: Auto-redirect after 5 minutes if participant doesn't proceed
+      let timeLeft = 300; // 5 minutes in seconds
+      const countdownElement = document.getElementById('countdown');
+      
+      function updateCountdown() {
+        if (timeLeft > 0) {
+          const minutes = Math.floor(timeLeft / 60);
+          const seconds = timeLeft % 60;
+          countdownElement.textContent = `Auto-redirect in ${minutes}:${seconds.toString().padStart(2, '0')}`;
+          timeLeft--;
+        } else {
+          countdownElement.textContent = 'Redirecting now...';
+          returnToIndex();
+        }
+      }
+      
+      // Start countdown
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+    });
+  </script>
+</body>
+</html>

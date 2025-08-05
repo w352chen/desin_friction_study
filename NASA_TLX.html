@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NASA-TLX</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      max-width: 800px;
+      margin: auto;
+      background-color: #f9f9f9;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .scale-block {
+      margin-bottom: 40px;
+    }
+
+    .scale-block h2 {
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+
+    .question {
+      font-style: italic;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    input[type=range] {
+      width: 100%;
+    }
+
+    output {
+      display: block;
+      text-align: center;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+
+    button {
+      display: block;
+      margin: 40px auto 0;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>NASA Task Load Index (NASA-TLX)</h1>
+  <p>Please use the sliders below to rate your experience from <strong>0 (Very Low)</strong> to <strong>20 (Very High)</strong>.</p>
+
+  <form>
+
+    <div class="scale-block">
+      <h2>Mental Demand</h2>
+      <div class="question">How mentally demanding was the task?</div>
+      <div class="slider-labels"><span>Very Low</span><span>Very High</span></div>
+      <input type="range" min="0" max="20" value="10" oninput="mental.value = this.value">
+      <output id="mental">10</output>
+    </div>
+
+    <div class="scale-block">
+      <h2>Physical Demand</h2>
+      <div class="question">How physically demanding was the task?</div>
+      <div class="slider-labels"><span>Very Low</span><span>Very High</span></div>
+      <input type="range" min="0" max="20" value="10" oninput="physical.value = this.value">
+      <output id="physical">10</output>
+    </div>
+
+    <!-- <div class="scale-block">
+      <h2>Temporal Demand</h2>
+      <div class="question">How hurried or rushed was the pace of the task?</div>
+      <div class="slider-labels"><span>Very Low</span><span>Very High</span></div>
+      <input type="range" min="0" max="20" value="10" oninput="temporal.value = this.value">
+      <output id="temporal">10</output>
+    </div> -->
+
+    <div class="scale-block">
+      <h2>Performance</h2>
+      <div class="question">How successful were you in accomplishing what you were asked to do?</div>
+      <div class="slider-labels"><span>Perfect</span><span>Failure</span></div>
+      <input type="range" min="0" max="20" value="10" oninput="performance.value = this.value">
+      <output id="performance">10</output>
+    </div>
+
+    <div class="scale-block">
+      <h2>Effort</h2>
+      <div class="question">How hard did you have to work to accomplish your level of performance?</div>
+      <div class="slider-labels"><span>Very Low</span><span>Very High</span></div>
+      <input type="range" min="0" max="20" value="10" oninput="effort.value = this.value">
+      <output id="effort">10</output>
+    </div>
+
+    <div class="scale-block">
+      <h2>Frustration Level</h2>
+      <div class="question">How insecure, discouraged, irritated, stressed, and annoyed were you?</div>
+      <div class="slider-labels"><span>Very Low</span><span>Very High</span></div>
+      <input type="range" min="0" max="20" value="10" oninput="frustration.value = this.value">
+      <output id="frustration">10</output>
+    </div>
+
+    <button type="submit">Submit</button>
+  </form>
+
+</body>
+</html>

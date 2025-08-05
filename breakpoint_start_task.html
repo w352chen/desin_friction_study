@@ -103,7 +103,7 @@
 <body>
 
   <!-- Fullscreen SketchBug interface -->
-  <iframe src="https://sketchbug.onrender.com"></iframe>
+  <iframe src="https://sketchbug-sketching.onrender.com"></iframe>
 
   <!-- Floating task bar -->
   <div class="task-popup" id="popup">
@@ -112,10 +112,10 @@
         Task:
       </div>
       <ol style="padding-left: 18px; margin-top: 0;">
-        <li>Switch to <strong>file2.py</strong>.</li>
-        <li>Set breakpoints at lines <strong>4</strong>, <strong>5</strong>, and <strong>13</strong>.</li>
+        <li>Stay in <strong>file1.py</strong>.</li>
+        <li>Set breakpoints at lines <strong>3</strong>, <strong>5</strong>, and <strong>7</strong>.</li>
         <li>Start the debugger.</li>
-        <li>Set breakpoints at lines <strong>14</strong>, <strong>16</strong>, <strong>17</strong>, and <strong>18</strong>.</li>
+        <li>Set breakpoints at lines <strong>8</strong>, <strong>9</strong>, <strong>12</strong>, and <strong>18</strong>.</li>
         <li>Remove all breakpoints.</li>
       </ol>
     </div>
@@ -123,6 +123,11 @@
   </div>
 
   <script>
+    // Record task start time
+    let taskStartTime = new Date();
+    console.log('Breakpoint Start Task start time:', taskStartTime.toISOString());
+    localStorage.setItem('breakpoint_start_task_start_time', taskStartTime.toISOString());
+
     function showFollowup() {
       const content = document.getElementById("popupContent");
       content.innerHTML = `
@@ -145,7 +150,26 @@
         </div>
       `;
       const btn = document.querySelector('.next-button');
-      btn.onclick = () => window.location.href = 'tutorial_sketch_continue.html';
+      btn.onclick = () => {
+        const selectedRating = document.querySelector('input[name="success"]:checked');
+        if (!selectedRating) {
+          alert('Please select a rating before continuing');
+          return;
+        }
+        
+        const taskEndTime = new Date();
+        const taskDuration = (taskEndTime - taskStartTime) / 1000;
+        
+        console.log('Breakpoint Start Task end time:', taskEndTime.toISOString());
+        console.log('Breakpoint Start Task duration:', taskDuration, 'seconds');
+        console.log('Breakpoint Start Task rating:', selectedRating.value);
+        
+        localStorage.setItem('breakpoint_start_task_end_time', taskEndTime.toISOString());
+        localStorage.setItem('breakpoint_start_task_duration_seconds', taskDuration.toString());
+        localStorage.setItem('breakpoint_start_task_rating', selectedRating.value);
+        
+        window.location.href = 'tutorial_sketch_continue.html';
+      };
     }
   </script>
 

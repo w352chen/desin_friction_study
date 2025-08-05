@@ -112,10 +112,10 @@
         Task:
       </div>
       <ol style="padding-left: 18px; margin-top: 0;">
-        <li>Switch to <strong>file2.py</strong>.</li>
-        <li>Set breakpoints at lines <strong>14</strong> and <strong>18</strong>.</li>
-        <li>Start the debugger.</li>
-        <li>Continue execution until <strong>i = 7</strong>.</li>
+        <li>Stay in <strong>file1.py</strong>.</li>
+        <li>Set breakpoints at lines <strong>7</strong> and <strong>8</strong>.</li>
+        <!-- <li>Start the debugger.</li> -->
+        <li>What is the value of flag when <strong>num = 97</strong> and <strong>i = 7</strong> (Hint: consider using Continue).</li>
         <li>Remove all breakpoints.</li>
       </ol>
     </div>
@@ -123,6 +123,11 @@
   </div>
 
   <script>
+    // Record task start time
+    let taskStartTime = new Date();
+    console.log('Continue Task 2 start time:', taskStartTime.toISOString());
+    localStorage.setItem('continue_task2_start_time', taskStartTime.toISOString());
+
     function showFollowup() {
       const content = document.getElementById("popupContent");
       content.innerHTML = `
@@ -145,7 +150,26 @@
         </div>
       `;
       const btn = document.querySelector('.next-button');
-      btn.onclick = () => window.location.href = 'tutorial_keyboard_stepInto.html';
+      btn.onclick = () => {
+        const selectedRating = document.querySelector('input[name="success"]:checked');
+        if (!selectedRating) {
+          alert('Please select a rating before continuing');
+          return;
+        }
+        
+        const taskEndTime = new Date();
+        const taskDuration = (taskEndTime - taskStartTime) / 1000;
+        
+        console.log('Continue Task 2 end time:', taskEndTime.toISOString());
+        console.log('Continue Task 2 duration:', taskDuration, 'seconds');
+        console.log('Continue Task 2 rating:', selectedRating.value);
+        
+        localStorage.setItem('continue_task2_end_time', taskEndTime.toISOString());
+        localStorage.setItem('continue_task2_duration_seconds', taskDuration.toString());
+        localStorage.setItem('continue_task2_rating', selectedRating.value);
+        
+        window.location.href = 'tutorial_keyboard_stepInto.html';
+      };
     }
   </script>
 

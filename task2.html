@@ -175,6 +175,13 @@
   </div>
 
   <script>
+    // Record task start time
+    let taskStartTime = new Date();
+    console.log('Task 2 start time:', taskStartTime.toISOString());
+    
+    // Save start time to localStorage
+    localStorage.setItem('task2_start_time', taskStartTime.toISOString());
+
     function showFollowup() {
       const content = document.getElementById("popupContent");
       content.innerHTML = `
@@ -197,7 +204,30 @@
         </div>
       `;
       const btn = document.querySelector('.next-button');
-      btn.onclick = () => window.location.href = 'https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_3sEhxMWWAWKIXGK';
+      btn.onclick = () => {
+        // Get selected rating
+        const selectedRating = document.querySelector('input[name="success"]:checked');
+        if (!selectedRating) {
+          alert('Please select a rating before continuing');
+          return;
+        }
+        
+        // Record task completion time and rating
+        const taskEndTime = new Date();
+        const taskDuration = (taskEndTime - taskStartTime) / 1000;
+        
+        console.log('Task 2 end time:', taskEndTime.toISOString());
+        console.log('Task 2 duration:', taskDuration, 'seconds');
+        console.log('Task 2 rating:', selectedRating.value);
+        
+        // Save all data to localStorage
+        localStorage.setItem('task2_end_time', taskEndTime.toISOString());
+        localStorage.setItem('task2_duration_seconds', taskDuration.toString());
+        localStorage.setItem('task2_rating', selectedRating.value);
+        
+        // Navigate to study completion page
+        window.location.href = 'NASA_TLX.html';
+      };
     }
   </script>
 

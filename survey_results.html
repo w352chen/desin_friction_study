@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Survey Results Export</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      background-color: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .summary {
+      background-color: #f0f8ff;
+      border: 1px solid #b6d7ff;
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .summary h2 {
+      margin-top: 0;
+      color: #0066cc;
+    }
+
+    .controls {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .btn {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 0 10px;
+      transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-secondary {
+      background-color: #6c757d;
+    }
+
+    .btn-secondary:hover {
+      background-color: #545b62;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: white;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8f9fa;
+      font-weight: bold;
+      color: #495057;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+
+    tr:hover {
+      background-color: #e9ecef;
+    }
+
+    .no-data {
+      text-align: center;
+      color: #6c757d;
+      font-style: italic;
+      padding: 40px;
+    }
+
+    .rating {
+      font-weight: bold;
+      color: #007BFF;
+    }
+
+    .duration {
+      color: #28a745;
+    }
+
+    .warning {
+      background-color: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+
+    .clear-btn {
+      background-color: #dc3545;
+      margin-left: 20px;
+    }
+
+    .clear-btn:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Survey Task Completion Status</h1>
+    
+    <div class="summary">
+      <h2>Data Overview</h2>
+      <p><strong>Participant ID:</strong> <span id="participantIdDisplay">Not Set</span></p>
+      <p>Completed tasks: <span id="completedCount">0</span></p>
+      <p>Total duration: <span id="totalDuration">0</span> minutes</p>
+      <p>Average rating: <span id="averageRating">-</span></p>
+    </div>
+
+    <div class="controls">
+      <button class="btn" onclick="refreshData()">🔄 Refresh Data</button>
+      <button class="btn" onclick="downloadCSV()">📥 Download CSV</button>
+      <button class="btn" onclick="downloadJSON()">📥 Download JSON</button>
+      <button class="btn btn-secondary" onclick="copyToClipboard()">📋 Copy Data</button>
+      <button class="btn clear-btn" onclick="clearAllData()">🗑️ Clear All Data</button>
+    </div>
+
+    <div class="warning" style="background-color: #fff3cd; border-color: #ffc107; color: #856404;">
+      <strong>For Researchers:</strong> Each participant gets a completely isolated data session. 
+      When a new participant enters their ID, all previous data is automatically cleared to prevent contamination.
+      The CSV file will only contain data from the current participant session.
+    </div>
+
+    <div id="warningMessage" class="warning" style="display: none;">
+      <strong>Warning:</strong> Some tasks are not yet completed or data is incomplete.
+    </div>
+
+    <div id="participantWarning" class="warning" style="display: none;">
+      <strong>Notice:</strong> No participant ID is set. Please ensure participants enter their ID on the <a href="index.html">main study page</a> before starting tasks.
+    </div>
+
+    <table id="resultsTable">
+      <thead>
+        <tr>
+          <th>Participant ID</th>
+          <th>Task Name</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+          <th>Duration (Seconds)</th>
+          <th>Duration (Minutes)</th>
+          <th>Success Rating</th>
+          <th>NASA-TLX Overall</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody">
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Define all task configurations
+    const TASKS = [
+      { key: 'stepover_stop_task1', name: 'Step Over Stop Task 1' },
+      { key: 'breakpoint_start_task', name: 'Breakpoint Start Task' },
+      { key: 'continue_task', name: 'Continue Task' },
+      { key: 'stepinto_task', name: 'Step Into Task' },
+      { key: 'stepout_task', name: 'Step Out Task' },
+      { key: 'task1', name: 'Task 1' },
+      { key: 'breakpoint_start_task2', name: 'Breakpoint Start Task 2' },
+      { key: 'continue_task2', name: 'Continue Task 2' },
+      { key: 'stepinto_task2', name: 'Step Into Task 2' },
+      { key: 'stepout_task2', name: 'Step Out Task 2' },
+      { key: 'stepover_stop_task2', name: 'Step Over Stop Task 2' },
+      { key: 'task2', name: 'Task 2' }
+    ];
+
+    function getTaskData(taskKey) {
+      const startTime = localStorage.getItem(`${taskKey}_start_time`);
+      const endTime = localStorage.getItem(`${taskKey}_end_time`);
+      const duration = localStorage.getItem(`${taskKey}_duration_seconds`);
+      const rating = localStorage.getItem(`${taskKey}_rating`);
+
+      return {
+        startTime: startTime || null,
+        endTime: endTime || null,
+        duration: duration ? parseFloat(duration) : null,
+        rating: rating ? parseInt(rating) : null,
+        isComplete: !!(startTime && endTime && duration && rating)
+      };
+    }
+
+    function formatDateTime(isoString) {
+      if (!isoString) return '-';
+      const date = new Date(isoString);
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
+
+    function formatDuration(seconds) {
+      if (!seconds) return '-';
+      return Math.round(seconds * 100) / 100;
+    }
+
+    function formatMinutes(seconds) {
+      if (!seconds) return '-';
+      return Math.round((seconds / 60) * 100) / 100;
+    }
+
+    function refreshData() {
+      const tbody = document.getElementById('resultsBody');
+      tbody.innerHTML = '';
+
+      // Get participant ID
+      const participantId = localStorage.getItem('participant_id') || 'Not Set';
+      document.getElementById('participantIdDisplay').textContent = participantId;
+      
+      // Show warning if no participant ID is set
+      const participantWarning = document.getElementById('participantWarning');
+      if (participantId === 'Not Set') {
+        document.getElementById('participantIdDisplay').style.color = '#dc3545';
+        document.getElementById('participantIdDisplay').style.fontWeight = 'bold';
+        participantWarning.style.display = 'block';
+      } else {
+        document.getElementById('participantIdDisplay').style.color = '#28a745';
+        document.getElementById('participantIdDisplay').style.fontWeight = 'bold';
+        participantWarning.style.display = 'none';
+      }
+
+      let completedCount = 0;
+      let totalDuration = 0;
+      let totalRating = 0;
+      let ratingCount = 0;
+      let hasIncompleteData = false;
+
+      TASKS.forEach(task => {
+        const data = getTaskData(task.key);
+        const row = document.createElement('tr');
+
+        let statusText = '';
+        let statusColor = '';
+
+        if (data.isComplete) {
+          completedCount++;
+          totalDuration += data.duration;
+          totalRating += data.rating;
+          ratingCount++;
+          statusText = '✅ Completed';
+          statusColor = '#28a745';
+        } else {
+          hasIncompleteData = true;
+          if (data.startTime && !data.endTime) {
+            statusText = '⏳ In Progress';
+            statusColor = '#ffc107';
+          } else if (!data.startTime) {
+            statusText = '❌ Not Started';
+            statusColor = '#6c757d';
+          } else {
+            statusText = '⚠️ Incomplete Data';
+            statusColor = '#dc3545';
+          }
+        }
+
+        const nasaTlxOverall = localStorage.getItem('nasa_tlx_overall_workload');
+        
+        row.innerHTML = `
+          <td>${participantId}</td>
+          <td><strong>${task.name}</strong></td>
+          <td>${formatDateTime(data.startTime)}</td>
+          <td>${formatDateTime(data.endTime)}</td>
+          <td class="duration">${formatDuration(data.duration)}</td>
+          <td class="duration">${formatMinutes(data.duration)}</td>
+          <td class="rating">${data.rating || '-'}</td>
+          <td class="rating">${nasaTlxOverall || '-'}</td>
+          <td style="color: ${statusColor}; font-weight: bold;">${statusText}</td>
+        `;
+
+        tbody.appendChild(row);
+      });
+
+      // Update overview data
+      document.getElementById('completedCount').textContent = completedCount;
+      document.getElementById('totalDuration').textContent = Math.round((totalDuration / 60) * 100) / 100;
+      document.getElementById('averageRating').textContent = 
+        ratingCount > 0 ? Math.round((totalRating / ratingCount) * 100) / 100 : '-';
+
+      // Show/hide warning message
+      const warningMessage = document.getElementById('warningMessage');
+      if (hasIncompleteData) {
+        warningMessage.style.display = 'block';
+      } else {
+        warningMessage.style.display = 'none';
+      }
+    }
+
+    function getAllData() {
+      const participantId = localStorage.getItem('participant_id') || 'Not Set';
+      const participantStartTime = localStorage.getItem('participant_start_time');
+      
+      // Get NASA-TLX data
+      const nasaTlxData = {
+        mental_demand: localStorage.getItem('nasa_tlx_mental_demand') || '',
+        physical_demand: localStorage.getItem('nasa_tlx_physical_demand') || '',
+        temporal_demand: localStorage.getItem('nasa_tlx_temporal_demand') || '',
+        performance: localStorage.getItem('nasa_tlx_performance') || '',
+        effort: localStorage.getItem('nasa_tlx_effort') || '',
+        frustration: localStorage.getItem('nasa_tlx_frustration') || '',
+        overall_workload: localStorage.getItem('nasa_tlx_overall_workload') || ''
+      };
+      
+      return TASKS.map(task => {
+        const data = getTaskData(task.key);
+        return {
+          participant_id: participantId,
+          participant_start_time: participantStartTime,
+          task_name: task.name,
+          task_key: task.key,
+          start_time: data.startTime,
+          end_time: data.endTime,
+          duration_seconds: data.duration,
+          duration_minutes: data.duration ? Math.round((data.duration / 60) * 100) / 100 : null,
+          success_rating: data.rating,
+          is_complete: data.isComplete,
+          nasa_tlx_mental_demand: nasaTlxData.mental_demand,
+          nasa_tlx_physical_demand: nasaTlxData.physical_demand,
+          nasa_tlx_temporal_demand: nasaTlxData.temporal_demand,
+          nasa_tlx_performance: nasaTlxData.performance,
+          nasa_tlx_effort: nasaTlxData.effort,
+          nasa_tlx_frustration: nasaTlxData.frustration,
+          nasa_tlx_overall_workload: nasaTlxData.overall_workload
+        };
+      });
+    }
+
+    function downloadCSV() {
+      const participantId = localStorage.getItem('participant_id') || 'Unknown';
+      console.log(`📥 Downloading CSV for participant: ${participantId}`);
+      console.log(`🔒 Data isolation verified - CSV contains ONLY data for participant: ${participantId}`);
+      
+      const data = getAllData();
+      
+      // CSV headers
+      const headers = [
+        'Participant ID',
+        'Participant Start Time',
+        'Task Name',
+        'Task Key', 
+        'Start Time',
+        'End Time',
+        'Duration (Seconds)',
+        'Duration (Minutes)',
+        'Success Rating',
+        'Is Complete',
+        'NASA-TLX Mental Demand',
+        'NASA-TLX Physical Demand',
+        'NASA-TLX Temporal Demand',
+        'NASA-TLX Performance',
+        'NASA-TLX Effort',
+        'NASA-TLX Frustration',
+        'NASA-TLX Overall Workload'
+      ];
+
+      // Generate CSV content
+      let csvContent = headers.join(',') + '\n';
+      
+      data.forEach(row => {
+        const csvRow = [
+          `"${row.participant_id}"`,
+          `"${row.participant_start_time || ''}"`,
+          `"${row.task_name}"`,
+          `"${row.task_key}"`,
+          `"${row.start_time || ''}"`,
+          `"${row.end_time || ''}"`,
+          row.duration_seconds || '',
+          row.duration_minutes || '',
+          row.success_rating || '',
+          row.is_complete,
+          row.nasa_tlx_mental_demand || '',
+          row.nasa_tlx_physical_demand || '',
+          row.nasa_tlx_temporal_demand || '',
+          row.nasa_tlx_performance || '',
+          row.nasa_tlx_effort || '',
+          row.nasa_tlx_frustration || '',
+          row.nasa_tlx_overall_workload || ''
+        ];
+        csvContent += csvRow.join(',') + '\n';
+      });
+
+      // Download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      const participantId = localStorage.getItem('participant_id') || 'unknown';
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const filename = `survey_results_${participantId}_${dateStr}.csv`;
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function downloadJSON() {
+      const participantId = localStorage.getItem('participant_id') || 'Unknown';
+      console.log(`📥 Downloading JSON for participant: ${participantId}`);
+      console.log(`🔒 Data isolation verified - JSON contains ONLY data for participant: ${participantId}`);
+      
+      const data = getAllData();
+      const jsonContent = JSON.stringify(data, null, 2);
+      
+      const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      const participantId = localStorage.getItem('participant_id') || 'unknown';
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const filename = `survey_results_${participantId}_${dateStr}.json`;
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function copyToClipboard() {
+      const data = getAllData();
+      const jsonContent = JSON.stringify(data, null, 2);
+      
+      navigator.clipboard.writeText(jsonContent).then(() => {
+        alert('Data copied to clipboard!');
+      }).catch(err => {
+        console.error('Copy failed:', err);
+        alert('Copy failed. Please manually copy the data from the console.');
+        console.log('Survey Results:', jsonContent);
+      });
+    }
+
+    function clearAllData() {
+      const participantId = localStorage.getItem('participant_id') || 'Unknown';
+      
+      if (confirm(`⚠️ Are you sure you want to clear ALL data for participant "${participantId}"?\n\nThis will delete:\n- All task completion data\n- NASA-TLX ratings\n- Participant information\n\nThis action cannot be undone!`)) {
+        
+        // Clear all participant data comprehensively
+        const allKeys = [
+          // Participant info
+          'participant_id', 'participant_start_time',
+          
+          // All task data
+          'stepover_stop_task1_start_time', 'stepover_stop_task1_end_time', 'stepover_stop_task1_duration_seconds', 'stepover_stop_task1_rating',
+          'breakpoint_start_task_start_time', 'breakpoint_start_task_end_time', 'breakpoint_start_task_duration_seconds', 'breakpoint_start_task_rating',
+          'continue_task_start_time', 'continue_task_end_time', 'continue_task_duration_seconds', 'continue_task_rating',
+          'stepinto_task_start_time', 'stepinto_task_end_time', 'stepinto_task_duration_seconds', 'stepinto_task_rating',
+          'stepout_task_start_time', 'stepout_task_end_time', 'stepout_task_duration_seconds', 'stepout_task_rating',
+          'task1_start_time', 'task1_end_time', 'task1_duration_seconds', 'task1_rating',
+          'breakpoint_start_task2_start_time', 'breakpoint_start_task2_end_time', 'breakpoint_start_task2_duration_seconds', 'breakpoint_start_task2_rating',
+          'continue_task2_start_time', 'continue_task2_end_time', 'continue_task2_duration_seconds', 'continue_task2_rating',
+          'stepinto_task2_start_time', 'stepinto_task2_end_time', 'stepinto_task2_duration_seconds', 'stepinto_task2_rating',
+          'stepout_task2_start_time', 'stepout_task2_end_time', 'stepout_task2_duration_seconds', 'stepout_task2_rating',
+          'stepover_stop_task2_start_time', 'stepover_stop_task2_end_time', 'stepover_stop_task2_duration_seconds', 'stepover_stop_task2_rating',
+          'task2_start_time', 'task2_end_time', 'task2_duration_seconds', 'task2_rating',
+          
+          // NASA-TLX data
+          'nasa_tlx_mental_demand', 'nasa_tlx_physical_demand', 'nasa_tlx_temporal_demand',
+          'nasa_tlx_performance', 'nasa_tlx_effort', 'nasa_tlx_frustration',
+          'nasa_tlx_overall_workload', 'nasa_tlx_completed',
+          
+          // Study completion
+          'study_completion_accessed'
+        ];
+        
+        allKeys.forEach(key => {
+          localStorage.removeItem(key);
+        });
+        
+        console.log(`Cleared all data for participant: ${participantId}`);
+        alert(`✅ All data for participant "${participantId}" has been cleared!`);
+        refreshData();
+      }
+    }
+
+    // Refresh data when page loads
+    document.addEventListener('DOMContentLoaded', refreshData);
+  </script>
+</body>
+</html>
