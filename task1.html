@@ -103,7 +103,7 @@
 <body>
 
   <!-- Fullscreen SketchBug interface -->
-  <iframe src="https://sketchbug-sketching.onrender.com"></iframe>
+  <iframe id="sketchbugFrame" src=""></iframe>
 
   <!-- Floating task bar -->
   <div class="task-popup" id="popup">
@@ -150,6 +150,63 @@
     // Save start time to localStorage
     localStorage.setItem('task1_start_time', taskStartTime.toISOString());
 
+    // Function to determine correct SketchBug URL for Task 1 based on experiment condition
+    function getSketchBugUrlForTask1() {
+      const experimentCondition = localStorage.getItem('experiment_condition');
+      
+      // Determine which mode Task 1 uses in each condition:
+      // condition1: Sketch+Task1, Keyboard+Task2 → Task1 = Sketch
+      // condition2: Keyboard+Task2, Sketch+Task1 → Task1 = Sketch  
+      // condition3: Sketch+Task2, Keyboard+Task1 → Task1 = Keyboard
+      // condition4: Keyboard+Task1, Sketch+Task2 → Task1 = Keyboard
+      
+      if (experimentCondition === 'condition1' || experimentCondition === 'condition2') {
+        // Task 1 is Sketch mode
+        console.log('Task 1 using Sketch mode interface');
+        return 'https://sketchbug-sketching.onrender.com';
+      } else if (experimentCondition === 'condition3' || experimentCondition === 'condition4') {
+        // Task 1 is Keyboard mode
+        console.log('Task 1 using Keyboard mode interface');
+        return 'https://sketchbug.onrender.com';
+      } else {
+        // Fallback - default to Sketch interface
+        console.warn('Unknown experiment condition, defaulting to Sketch interface');
+        return 'https://sketchbug-sketching.onrender.com';
+      }
+    }
+
+    // Function to determine correct survey URL for Task 1 based on experiment condition
+    function getSurveyUrlForTask1() {
+      const experimentCondition = localStorage.getItem('experiment_condition');
+      
+      // Determine which mode Task 1 uses in each condition:
+      // condition1: Sketch+Task1, Keyboard+Task2 → Task1 = Sketch
+      // condition2: Keyboard+Task2, Sketch+Task1 → Task1 = Sketch  
+      // condition3: Sketch+Task2, Keyboard+Task1 → Task1 = Keyboard
+      // condition4: Keyboard+Task1, Sketch+Task2 → Task1 = Keyboard
+      
+      if (experimentCondition === 'condition1' || experimentCondition === 'condition2') {
+        // Task 1 is Sketch mode
+        console.log('Task 1 completed in Sketch mode, using Sketch survey');
+        return 'https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_a4ydJWKo7mNze9E';
+      } else if (experimentCondition === 'condition3' || experimentCondition === 'condition4') {
+        // Task 1 is Keyboard mode
+        console.log('Task 1 completed in Keyboard mode, using Keyboard survey');
+        return 'https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_5bBIX37FBxsxhki';
+      } else {
+        // Fallback - default to Sketch survey
+        console.warn('Unknown experiment condition, defaulting to Sketch survey');
+        return 'https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_a4ydJWKo7mNze9E';
+      }
+    }
+
+    // Set the correct SketchBug interface URL on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const sketchbugUrl = getSketchBugUrlForTask1();
+      document.getElementById('sketchbugFrame').src = sketchbugUrl;
+      console.log('Task 1 SketchBug interface loaded:', sketchbugUrl);
+    });
+
     function showFollowup() {
       const content = document.getElementById("popupContent");
       content.innerHTML = `
@@ -194,9 +251,10 @@
         localStorage.setItem('task1_duration_seconds', taskDuration.toString());
         localStorage.setItem('task1_rating', selectedRating.value);
         
-        // Navigate to next page
-        // window.location.href = 'https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_a4ydJWKo7mNze9E';
-        window.location.href = "NASA_TLX.html";
+        // Navigate to appropriate survey based on experiment condition
+        const surveyUrl = getSurveyUrlForTask1();
+        console.log('Redirecting to survey:', surveyUrl);
+        window.location.href = surveyUrl;
       };
     }
   </script>

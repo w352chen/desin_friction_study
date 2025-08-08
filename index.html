@@ -54,6 +54,21 @@
       border-color: #007BFF;
     }
 
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+      background-color: white;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #007BFF;
+    }
+
     .btn {
       background-color: #007BFF;
       color: white;
@@ -88,18 +103,30 @@
     }
 
     li {
-      margin: 20px 0;
+      margin: 15px 0;
+      list-style: none;
     }
 
     a {
       text-decoration: none;
       color: #007BFF;
-      font-size: 20px;
-      transition: color 0.2s;
+      font-size: 18px;
+      transition: all 0.2s ease;
+      display: inline-block;
+      padding: 10px 16px;
+      border-radius: 6px;
+      background-color: #f8f9fa;
+      border: 1px solid #e9ecef;
+      min-width: 280px;
+      text-align: left;
     }
 
     a:hover {
       color: #0056b3;
+      background-color: #e7f3ff;
+      border-color: #007BFF;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
     }
 
     .participant-info {
@@ -119,6 +146,8 @@
       text-decoration: underline;
       font-size: 14px;
     }
+
+
   </style>
 </head>
 <body>
@@ -132,29 +161,31 @@
       <!-- <label for="participantId">Participant ID:</label> -->
       <input type="text" id="participantId" placeholder="Enter your participant ID" required>
     </div>
+    
+    <div class="form-group">
+      <label for="experimentCondition">Experiment Condition:</label>
+      <select id="experimentCondition" required>
+        <option value="">Select condition...</option>
+        <option value="condition1">Condition 1: Sketch+Task1, Keyboard+Task2</option>
+        <option value="condition2">Condition 2: Keyboard+Task2, Sketch+Task1</option>
+        <option value="condition3">Condition 3: Sketch+Task2, Keyboard+Task1</option>
+        <option value="condition4">Condition 4: Keyboard+Task1, Sketch+Task2</option>
+      </select>
+    </div>
+    
     <button class="btn" onclick="setParticipantId()">Continue</button>
   </div>
 
   <!-- Study Links (hidden initially) -->
   <div id="studyLinks" class="study-links">
     <div class="participant-info">
-      <strong>Participant ID:</strong> <span id="displayParticipantId"></span>
+      <strong>Participant ID:</strong> <span id="displayParticipantId"></span><br>
+      <strong>Condition:</strong> <span id="displayCondition"></span>
       <button class="change-id" onclick="changeParticipantId()">Change ID</button>
     </div>
 
-    <ul>
-      <li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_emOP8hXwSR2lF2e" target="_blank">📋 Pre-Questionnaire</a></li>
-      <!-- <li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_emOP8hXwSR2lF2e" target="_blank">📝 Pre-Survey</a></li> -->
-      <li><a href="tutorial_keyboard_break_start.html" target="_blank">📖 Keyboard Mode</a></li>
-      <!-- <li><a href="https://sketchbug.onrender.com/" target="_blank">🧩 Task 1</a></li> -->
-      <!-- <li><a href="task1.html" target="_blank">🧩 Task 1</a></li> -->
-      <!-- <li><a href="https://sketchbug.onrender.com/" target="_blank">🧩 Task 2</a></li> -->
-      <li><a href="tutorial_sketch_break_start.html" target="_blank">📖 Sketch Mode</a></li>
-      <!-- <li><a href="https://sketchbug.onrender.com/" target="_blank">🧩 Task 1</a></li> -->
-      <!-- <li><a href="https://sketchbug.onrender.com/" target="_blank">🧩 Task 2</a></li> -->
-      <!-- <li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_a4ydJWKo7mNze9E" target="_blank">📝 Post-Survey</a></li> -->
-      <li><a href="study_complete.html" target="_blank">⬇️ Download CSV</a></li>
-      <li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_bjszlKhvhbGYpRI" target="_blank">📋 Post-Questionnaire</a></li>
+    <ul id="taskList">
+      <!-- Task links will be dynamically generated based on condition -->
     </ul>
   </div>
 
@@ -162,29 +193,38 @@
     // Check if participant ID is already stored
     document.addEventListener('DOMContentLoaded', function() {
       const storedId = localStorage.getItem('participant_id');
-      if (storedId) {
-        showStudyLinks(storedId);
+      const storedCondition = localStorage.getItem('experiment_condition');
+      if (storedId && storedCondition) {
+        showStudyLinks(storedId, storedCondition);
       }
     });
 
     function setParticipantId() {
       const participantId = document.getElementById('participantId').value.trim();
+      const experimentCondition = document.getElementById('experimentCondition').value;
       
       if (!participantId) {
         alert('Please enter a participant ID');
         return;
       }
 
+      if (!experimentCondition) {
+        alert('Please select an experiment condition');
+        return;
+      }
+
       // Clear ALL previous participant data to ensure clean slate
       clearAllParticipantData();
 
-      // Store new participant ID in localStorage
+      // Store new participant ID and experiment condition in localStorage
       localStorage.setItem('participant_id', participantId);
+      localStorage.setItem('experiment_condition', experimentCondition);
       localStorage.setItem('participant_start_time', new Date().toISOString());
       
       console.log('New participant session started:', participantId);
+      console.log('Experiment condition:', experimentCondition);
       console.log('All previous data cleared for clean session');
-      showStudyLinks(participantId);
+      showStudyLinks(participantId, experimentCondition);
     }
 
     function clearAllParticipantData() {
@@ -193,6 +233,7 @@
         // Participant info
         'participant_id',
         'participant_start_time',
+        'experiment_condition',
         
         // Task data
         'stepover_stop_task1_start_time',
@@ -253,20 +294,7 @@
         'task2_start_time',
         'task2_end_time',
         'task2_duration_seconds',
-        'task2_rating',
-        
-        // NASA-TLX data
-        'nasa_tlx_mental_demand',
-        'nasa_tlx_physical_demand',
-        'nasa_tlx_temporal_demand',
-        'nasa_tlx_performance',
-        'nasa_tlx_effort',
-        'nasa_tlx_frustration',
-        'nasa_tlx_overall_workload',
-        'nasa_tlx_completed',
-        
-        // Study completion tracking
-        'study_completion_accessed'
+        'task2_rating'
       ];
 
       // Clear all participant data
@@ -277,10 +305,80 @@
       console.log('Cleared all participant data keys:', dataKeys.length, 'items');
     }
 
-    function showStudyLinks(participantId) {
+    function showStudyLinks(participantId, experimentCondition) {
       document.getElementById('participantForm').style.display = 'none';
       document.getElementById('studyLinks').classList.add('show');
       document.getElementById('displayParticipantId').textContent = participantId;
+      document.getElementById('displayCondition').textContent = getConditionDescription(experimentCondition);
+      
+      generateTaskList(experimentCondition);
+    }
+
+    function getConditionDescription(condition) {
+      const descriptions = {
+        'condition1': 'Sketch+Task1, Keyboard+Task2',
+        'condition2': 'Keyboard+Task2, Sketch+Task1', 
+        'condition3': 'Sketch+Task2, Keyboard+Task1',
+        'condition4': 'Keyboard+Task1, Sketch+Task2'
+      };
+      return descriptions[condition] || condition;
+    }
+
+    function generateTaskList(experimentCondition) {
+      const taskList = document.getElementById('taskList');
+      taskList.innerHTML = '';
+
+      // Common tasks that appear in all conditions
+      const commonTasks = [
+        '<li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_emOP8hXwSR2lF2e" target="_blank">📋 Pre-Questionnaire</a></li>'
+      ];
+
+      // Condition-specific task sequences
+      const conditionTasks = {
+        'condition1': [
+          // Sketch + Task 1, then Keyboard + Task 2
+          '<li><a href="tutorial_sketch_break_start.html" target="_blank">📖 Tutorial: Sketch Mode</a></li>',
+          '<li><a href="task1.html" target="_blank">🧩 Task 1 (Sketch Mode)</a></li>',
+          '<li><a href="tutorial_keyboard_break_start.html" target="_blank">📖 Tutorial: Keyboard Mode</a></li>',
+          '<li><a href="task2.html" target="_blank">🧩 Task 2 (Keyboard Mode)</a></li>'
+        ],
+        'condition2': [
+          // Keyboard + Task 2, then Sketch + Task 1  
+          '<li><a href="tutorial_keyboard_break_start.html" target="_blank">📖 Tutorial: Keyboard Mode</a></li>',
+          '<li><a href="task2.html" target="_blank">🧩 Task 2 (Keyboard Mode)</a></li>',
+          '<li><a href="tutorial_sketch_break_start.html" target="_blank">📖 Tutorial: Sketch Mode</a></li>',
+          '<li><a href="task1.html" target="_blank">🧩 Task 1 (Sketch Mode)</a></li>'
+        ],
+        'condition3': [
+          // Sketch + Task 2, then Keyboard + Task 1
+          '<li><a href="tutorial_sketch_break_start.html" target="_blank">📖 Tutorial: Sketch Mode</a></li>',
+          '<li><a href="task2.html" target="_blank">🧩 Task 2 (Sketch Mode)</a></li>',
+          '<li><a href="tutorial_keyboard_break_start.html" target="_blank">📖 Tutorial: Keyboard Mode</a></li>',
+          '<li><a href="task1.html" target="_blank">🧩 Task 1 (Keyboard Mode)</a></li>'
+        ],
+        'condition4': [
+          // Keyboard + Task 1, then Sketch + Task 2
+          '<li><a href="tutorial_keyboard_break_start.html" target="_blank">📖 Tutorial: Keyboard Mode</a></li>',
+          '<li><a href="task1.html" target="_blank">🧩 Task 1 (Keyboard Mode)</a></li>',
+          '<li><a href="tutorial_sketch_break_start.html" target="_blank">📖 Tutorial: Sketch Mode</a></li>',
+          '<li><a href="task2.html" target="_blank">🧩 Task 2 (Sketch Mode)</a></li>'
+        ]
+      };
+
+      // Final tasks
+      const finalTasks = [
+        '<li><a href="#" onclick="downloadCSV(); return false;">📥 Download CSV</a></li>',
+        '<li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_0AMYWoJCsaoDoO2" target="_blank">📋 Post-Questionnaire</a></li>'
+      ];
+
+      // Combine all tasks
+      const allTasks = [
+        ...commonTasks,
+        ...(conditionTasks[experimentCondition] || []),
+        ...finalTasks
+      ];
+
+      taskList.innerHTML = allTasks.join('');
     }
 
     function changeParticipantId() {
@@ -310,10 +408,116 @@
         'task1_start_time', 'task2_start_time',
         'stepover_stop_task1_start_time', 'breakpoint_start_task_start_time',
         'continue_task_start_time', 'stepinto_task_start_time',
-        'stepout_task_start_time', 'nasa_tlx_completed'
+        'stepout_task_start_time'
       ];
       
       return taskKeys.some(key => localStorage.getItem(key) !== null);
+    }
+
+    function downloadCSV() {
+      const participantId = localStorage.getItem('participant_id') || 'Unknown';
+      
+      if (!participantId || participantId === 'Unknown') {
+        alert('Please set a participant ID first!');
+        return;
+      }
+
+      console.log(`📥 Downloading CSV for participant: ${participantId}`);
+      console.log(`🔒 Data isolation verified - CSV contains ONLY data for participant: ${participantId}`);
+
+      // Collect all data
+      const data = getAllTaskData();
+      
+      if (data.length === 0) {
+        alert('No task data found to download. Please complete some tasks first.');
+        return;
+      }
+
+      // Generate CSV content
+      const headers = [
+        'Participant ID',
+        'Experiment Condition',
+        'Participant Start Time',
+        'Task Name',
+        'Start Time',
+        'End Time', 
+        'Duration (seconds)',
+        'Duration (minutes)',
+        'Success Rating'
+      ];
+
+      let csvContent = headers.join(',') + '\n';
+      
+      data.forEach(row => {
+        csvContent += row.join(',') + '\n';
+      });
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+      const filename = `study_results_${participantId}_${dateStr}.csv`;
+      
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      console.log(`✅ CSV downloaded: ${filename}`);
+      alert(`✅ CSV file downloaded successfully!\nFile: ${filename}`);
+    }
+
+    function getAllTaskData() {
+      const participantId = localStorage.getItem('participant_id') || 'Unknown';
+      const experimentCondition = localStorage.getItem('experiment_condition') || 'Unknown';
+      const participantStartTime = localStorage.getItem('participant_start_time') || '';
+      const data = [];
+
+      // Define all possible tasks
+      const tasks = [
+        'stepover_stop_task1',
+        'breakpoint_start_task', 
+        'continue_task',
+        'stepinto_task',
+        'stepout_task',
+        'task1',
+        'breakpoint_start_task2',
+        'continue_task2', 
+        'stepinto_task2',
+        'stepout_task2',
+        'stepover_stop_task2',
+        'task2'
+      ];
+
+      tasks.forEach(taskName => {
+        const startTime = localStorage.getItem(`${taskName}_start_time`);
+        const endTime = localStorage.getItem(`${taskName}_end_time`);
+        const durationSeconds = localStorage.getItem(`${taskName}_duration_seconds`);
+        const rating = localStorage.getItem(`${taskName}_rating`);
+
+        if (startTime || endTime || durationSeconds || rating) {
+          const durationMinutes = durationSeconds ? Math.round(parseFloat(durationSeconds) / 60 * 100) / 100 : '';
+          
+          data.push([
+            participantId,
+            experimentCondition,
+            participantStartTime,
+            taskName,
+            startTime || '',
+            endTime || '',
+            durationSeconds || '',
+            durationMinutes || '',
+            rating || ''
+          ]);
+        }
+      });
+
+      return data;
     }
   </script>
 

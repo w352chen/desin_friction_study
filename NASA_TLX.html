@@ -113,8 +113,53 @@
       <output id="frustration">10</output>
     </div>
 
-    <button type="submit">Submit</button>
+    <button type="button" onclick="submitNasaTlx()">Submit</button>
   </form>
+
+  <script>
+    function submitNasaTlx() {
+      // Get all NASA-TLX values
+      const mentalDemand = document.querySelector('input[oninput="mental.value = this.value"]').value;
+      const physicalDemand = document.querySelector('input[oninput="physical.value = this.value"]').value;
+      const performance = document.querySelector('input[oninput="performance.value = this.value"]').value;
+      const effort = document.querySelector('input[oninput="effort.value = this.value"]').value;
+      const frustration = document.querySelector('input[oninput="frustration.value = this.value"]').value;
+
+      // Calculate overall workload (average of all dimensions, scaled to 0-20)
+      const overallWorkload = Math.round(
+        (parseInt(mentalDemand) + parseInt(physicalDemand) + parseInt(performance) + 
+         parseInt(effort) + parseInt(frustration)) / 5 * 100
+      ) / 100;
+
+      // Store in localStorage
+      localStorage.setItem('nasa_tlx_mental_demand', mentalDemand);
+      localStorage.setItem('nasa_tlx_physical_demand', physicalDemand);
+      localStorage.setItem('nasa_tlx_temporal_demand', ''); // Not used in this version
+      localStorage.setItem('nasa_tlx_performance', performance);
+      localStorage.setItem('nasa_tlx_effort', effort);
+      localStorage.setItem('nasa_tlx_frustration', frustration);
+      localStorage.setItem('nasa_tlx_overall_workload', overallWorkload);
+      localStorage.setItem('nasa_tlx_completed', new Date().toISOString());
+
+      console.log('NASA-TLX data saved:', {
+        mentalDemand, physicalDemand, performance, effort, frustration, overallWorkload
+      });
+
+      // Mark that participant has completed the NASA-TLX assessment
+      localStorage.setItem('study_completion_accessed', new Date().toISOString());
+      
+      console.log('NASA-TLX submitted, redirecting to main page');
+      
+      // Redirect to index.html after NASA-TLX submission
+      window.location.href = 'index.html';
+    }
+
+    // Prevent form submission on Enter key and handle it properly
+    document.querySelector('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      submitNasaTlx();
+    });
+  </script>
 
 </body>
 </html>
