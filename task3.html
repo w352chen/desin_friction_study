@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SketchBug Embedded Task</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    iframe {
+      border: none;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .task-popup {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 280px;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .task-header {
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .toggle-icon {
+      transition: transform 0.3s ease;
+    }
+
+    .task-description {
+      flex-grow: 1;
+    }
+
+    .next-button {
+      align-self: flex-end;
+      font-size: 20px;
+      background: none;
+      border: none;
+      color: #007BFF;
+      cursor: pointer;
+      padding: 0;
+      margin-top: 8px;
+    }
+
+    .next-button:hover {
+      color: #0056b3;
+    }
+
+    .rating-scale {
+      margin-top: 10px;
+    }
+
+    .rating-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .radio-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 0 4px;
+    }
+
+    .radio-group input[type="radio"] {
+      appearance: none;
+      background-color: #eee;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .radio-group input[type="radio"]:checked {
+      background-color: #007BFF;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fullscreen SketchBug interface -->
+  <iframe id="sketchbugFrame" src=""></iframe>
+
+  <!-- Floating task bar -->
+  <div class="task-popup" id="popup">
+    <div class="task-description" id="popupContent">
+      <div class="task-header">
+        Task:
+      </div>
+      <ol style="padding-left: 18px; margin-top: 0;">
+        <li>Switch to <strong>file4.py</strong>.</li>
+        <li>
+          Run the program and observe the loop:
+          <ul>
+            <!-- <li>What value does <code>try_print(n)</code> return?</li>
+            <li>Why does the loop still work even though <code>try_print</code> prints to the console?</li> -->
+            <li>What is the value of <code>d</code> in the first iteration when <code>n = 25</code>?</li>
+            <li>What is the value of <code>total</code> after the first and second iterations?</li>
+          </ul>
+        </li>
+        
+      
+        <li>
+          Step through the call to <code>to_calc(x)</code>:
+          <ul>
+            <li>What value does <code>to_calc(x)</code> return when <code>total = 4</code>?</li>
+          </ul>
+        </li>
+      
+        <li>
+          Observe the recursion:
+          <ul>
+            <!-- <li>What argument is passed into the recursive call when <code>n = 35</code>?</li>
+            <li>At what value of <code>n</code> does the base case <code>if n == 0</code> trigger?</li> -->
+            <li>What is the value of <code>total</code> just before returning from a recursive call?</li>
+            <li>Which functions (try_print, to_calc, identity, sum_digits) actually affect the logic of the program?</li>
+            <li>If you modified the identity call to identity(total + 10), how would that change the final output of sum_digits(25)?</li>
+          </ul>
+        </li>
+      
+        <!-- <li>
+          Use <strong>Step Into</strong> when <code>update_fn(value)</code> is called. Then answer:
+          <ul>
+            <li>Which function is entered?</li>
+            <li>What argument is passed in?</li>
+            <li>What value is returned?</li>
+          </ul>
+        </li> -->
+      
+        <!-- <li>
+          Use <strong>Step Out</strong> to return from the function back to <code>apply_until()</code>. Then answer:
+          <ul>
+            <li>Which line did you return to?</li>
+          </ul>
+        </li> -->
+      
+        <!-- <li>
+          Repeat using <strong>Step Over</strong> through the loop body multiple times. Then answer:
+          <ul>
+            <li>What are the updated values of <code>value</code> each time?</li>
+            <li>When does the loop exit?</li>
+          </ul>
+        </li> -->
+
+        <li>
+          Notify the researcher <strong>before</strong> you click the → button.
+        </li>    
+      </ol>
+    </div>
+    <button class="next-button" onclick="showFollowup()">→</button>
+  </div>
+
+  <script>
+    // Record task start time
+    let taskStartTime = new Date();
+    console.log('Task 3 start time:', taskStartTime.toISOString());
+    
+    // Save start time to localStorage
+    localStorage.setItem('task3_start_time', taskStartTime.toISOString());
+
+    // Function to determine correct SketchBug URL for Task 2 based on experiment condition
+    function getSketchBugUrlForTask3() {
+      const experimentCondition = localStorage.getItem('experiment_condition');
+      
+      // Determine which mode Task 2 uses in each condition:
+      // condition1: Sketch+Task1, Keyboard+Task2 → Task3 = Keyboard
+      // condition2: Keyboard+Task2, Sketch+Task1 → Task3 = Keyboard  
+      // condition3: Sketch+Task2, Keyboard+Task1 → Task3 = Sketch
+      // condition4: Keyboard+Task1, Sketch+Task2 → Task3 = Sketch
+      
+      if (experimentCondition === 'condition1' || experimentCondition === 'condition2') {
+        // Task 2 is Keyboard mode
+        console.log('Task 3 using Keyboard mode interface');
+        return 'https://sketchbug.onrender.com';
+      } else if (experimentCondition === 'condition3' || experimentCondition === 'condition4') {
+        // Task 2 is Sketch mode
+        console.log('Task 3 using Sketch mode interface');
+        return 'https://sketchbug-sketching.onrender.com';
+      } else {
+        // Fallback - default to Keyboard interface
+        console.warn('Unknown experiment condition, defaulting to Keyboard interface');
+        return 'https://sketchbug.onrender.com';
+      }
+    }
+
+    // Function to determine correct survey URL for Task 2 based on experiment condition
+    function getSurveyUrlForTask2() {
+      const experimentCondition = localStorage.getItem('experiment_condition');
+      
+      // Determine which mode Task 2 uses in each condition:
+      // condition1: Sketch+Task1, Keyboard+Task2 → Task2 = Keyboard
+      // condition2: Keyboard+Task2, Sketch+Task1 → Task2 = Keyboard  
+      // condition3: Sketch+Task2, Keyboard+Task1 → Task2 = Sketch
+      // condition4: Keyboard+Task1, Sketch+Task2 → Task2 = Sketch
+      return 'index.html';
+      
+      // if (experimentCondition === 'condition1' || experimentCondition === 'condition2') {
+      //   // Task 2 is Keyboard mode
+      //   console.log('Task 2 completed in Keyboard mode, using Keyboard survey');
+      //   return 'https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_5bBIX37FBxsxhki';
+      // } else if (experimentCondition === 'condition3' || experimentCondition === 'condition4') {
+      //   // Task 2 is Sketch mode
+      //   console.log('Task 2 completed in Sketch mode, using Sketch survey');
+      //   return 'https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_a4ydJWKo7mNze9E';
+      // } else {
+      //   // Fallback - default to Keyboard survey
+      //   console.warn('Unknown experiment condition, defaulting to Keyboard survey');
+      //   return 'https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_5bBIX37FBxsxhki';
+      // }
+    }
+
+    // Set the correct SketchBug interface URL on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const sketchbugUrl = getSketchBugUrlForTask3();
+      document.getElementById('sketchbugFrame').src = sketchbugUrl;
+      console.log('Task 3 SketchBug interface loaded:', sketchbugUrl);
+    });
+
+    function showFollowup() {
+      const content = document.getElementById("popupContent");
+      content.innerHTML = `
+        <div class="task-header">Instructions</div>
+        <div>
+          <p><strong>How successful were you in accomplishing these tasks?</strong></p>
+          <div class="rating-scale">
+            <div class="rating-labels">
+              <span>Unsuccessful</span>
+              <span>Successful</span>
+            </div>
+            <div class="radio-group">
+              <input type="radio" name="success" value="1">
+              <input type="radio" name="success" value="2">
+              <input type="radio" name="success" value="3">
+              <input type="radio" name="success" value="4">
+              <input type="radio" name="success" value="5">
+            </div>
+          </div>
+        </div>
+      `;
+      const btn = document.querySelector('.next-button');
+      btn.onclick = () => {
+        // Get selected rating
+        const selectedRating = document.querySelector('input[name="success"]:checked');
+        if (!selectedRating) {
+          alert('Please select a rating before continuing');
+          return;
+        }
+        
+        // Record task completion time and rating
+        const taskEndTime = new Date();
+        const taskDuration = (taskEndTime - taskStartTime) / 1000;
+        
+        console.log('Task 3 end time:', taskEndTime.toISOString());
+        console.log('Task 3 duration:', taskDuration, 'seconds');
+        console.log('Task 3 rating:', selectedRating.value);
+        
+        // Save all data to localStorage
+        localStorage.setItem('task3_end_time', taskEndTime.toISOString());
+        localStorage.setItem('task3_duration_seconds', taskDuration.toString());
+        localStorage.setItem('task3_rating', selectedRating.value);
+        
+        // Navigate to appropriate survey based on experiment condition
+        // const surveyUrl = getSurveyUrlForTask2();
+        // console.log('Redirecting to survey:', surveyUrl);
+        window.location.href = 'index.html';
+      };
+    }
+  </script>
+
+</body>
+</html>
+
+
+
+

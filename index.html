@@ -294,7 +294,12 @@
         'task2_start_time',
         'task2_end_time',
         'task2_duration_seconds',
-        'task2_rating'
+        'task2_rating',
+
+        'task3_start_time',
+        'task3_end_time',
+        'task3_duration_seconds',
+        'task3_rating'
       ];
 
       // Clear all participant data
@@ -368,7 +373,8 @@
       // Final tasks
       const finalTasks = [
         '<li><a href="#" onclick="downloadCSV(); return false;">📥 Download CSV</a></li>',
-        '<li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_0AMYWoJCsaoDoO2" target="_blank">📋 Post-Questionnaire</a></li>'
+        '<li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_0AMYWoJCsaoDoO2" target="_blank">📋 Post-Questionnaire</a></li>',
+        '<li><a href="task3.html" target="_blank">🧩 Task 3 (Combined Mode)</a></li>'
       ];
 
       // Combine all tasks
@@ -491,7 +497,8 @@
         'stepinto_task2',
         'stepout_task2',
         'stepover_stop_task2',
-        'task2'
+        'task2',
+        'task3'
       ];
 
       tasks.forEach(taskName => {
