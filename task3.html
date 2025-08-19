@@ -192,19 +192,19 @@
       // condition3: Sketch+Task2, Keyboard+Task1 → Task3 = Sketch
       // condition4: Keyboard+Task1, Sketch+Task2 → Task3 = Sketch
       
-      if (experimentCondition === 'condition1' || experimentCondition === 'condition2') {
-        // Task 2 is Keyboard mode
-        console.log('Task 3 using Keyboard mode interface');
-        return 'https://sketchbug.onrender.com'
-      } else if (experimentCondition === 'condition3' || experimentCondition === 'condition4') {
-        // Task 2 is Sketch mode
-        console.log('Task 3 using Sketch mode interface');
-        return 'https://sketchbug-sketching.onrender.com';
-      } else {
-        // Fallback - default to Keyboard interface
-        console.warn('Unknown experiment condition, defaulting to Keyboard interface');
+      // if (experimentCondition === 'condition1' || experimentCondition === 'condition2') {
+      //   // Task 2 is Keyboard mode
+      //   // console.log('Task 3 using Keyboard mode interface');
+      //   return 'https://sketchbug.onrender.com'
+      // } else if (experimentCondition === 'condition3' || experimentCondition === 'condition4') {
+      //   // Task 2 is Sketch mode
+      //   console.log('Task 3 using Sketch mode interface');
+      //   return 'https://sketchbug-sketching.onrender.com';
+      // } else {
+      //   // Fallback - default to Keyboard interface
+      //   console.warn('Unknown experiment condition, defaulting to Keyboard interface');
         return 'https://sketchbug-both.onrender.com';
-      }
+    //   }
     }
 
     // Function to determine correct survey URL for Task 2 based on experiment condition
