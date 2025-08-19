@@ -208,7 +208,7 @@
     }
 
     // Function to determine correct survey URL for Task 2 based on experiment condition
-    function getSurveyUrlForTask2() {
+    function getSurveyUrlForTask3() {
       const experimentCondition = localStorage.getItem('experiment_condition');
       
       // Determine which mode Task 2 uses in each condition:
@@ -216,7 +216,7 @@
       // condition2: Keyboard+Task2, Sketch+Task1 → Task2 = Keyboard  
       // condition3: Sketch+Task2, Keyboard+Task1 → Task2 = Sketch
       // condition4: Keyboard+Task1, Sketch+Task2 → Task2 = Sketch
-      return 'index.html';
+      return 'https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_9AY4edtJSq6gfb0';
       
       // if (experimentCondition === 'condition1' || experimentCondition === 'condition2') {
       //   // Task 2 is Keyboard mode
@@ -284,9 +284,9 @@
         localStorage.setItem('task3_rating', selectedRating.value);
         
         // Navigate to appropriate survey based on experiment condition
-        // const surveyUrl = getSurveyUrlForTask2();
-        // console.log('Redirecting to survey:', surveyUrl);
-        window.location.href = 'index.html';
+        const surveyUrl = getSurveyUrlForTask3();
+        console.log('Redirecting to survey:', surveyUrl);
+        window.location.href = surveyUrl;
       };
     }
   </script>
