@@ -44,27 +44,31 @@
 <body>
 
   <div class="main-content">
-    <h1>Keyboard-Based Debugger Step Over and Stop Demo</h1>
+    <h1>Keyboard-Based Debugger Breakpoint and Start Demo</h1>
 
     <div class="section">
       <div class="video-container">
+        <!-- 用 div 占位，API 会在这里创建 iframe -->
         <div id="player"></div>
       </div>
     </div>
   </div>
 
   <div class="bottom-button">
-    <a class="try-button" href="stepOver_stop_task2.html">Next</a>
+    <a class="try-button" href="breakpoint_start_task2.html">Next</a>
   </div>
 
+  <!-- 加载 YouTube IFrame API -->
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     let player;
 
+    // API 会在全局调用这个函数
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('player', {
-        videoId: 'rDIhNKxLmbE',
+        videoId: 'aY1ka9171wo',
         playerVars: {
+          // 可选：内联播放，避免在移动端强制全屏
           playsinline: 1
         },
         events: {
@@ -74,8 +78,12 @@
     }
 
     function onPlayerReady(event) {
+      // 尝试将播放速率设为 1.5x
       try {
         event.target.setPlaybackRate(1.5);
+        // 可选：自动播放（注意浏览器可能会拦截，若需更稳定可先设置静音）
+        // event.target.mute();
+        // event.target.playVideo();
       } catch (e) {
         console.warn('setPlaybackRate failed:', e);
       }
@@ -83,5 +91,3 @@
   </script>
 </body>
 </html>
-
-
