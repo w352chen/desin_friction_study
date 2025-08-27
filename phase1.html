@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>DesignFriction + Writing Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body { background:#f5f7fa; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+    .wrap {
+      height: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr; /* adjust to 1.2fr 0.8fr if you prefer */
+      gap: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    .panel {
+      background:#fff; border-radius:12px; box-shadow:0 4px 14px rgba(0,0,0,.08);
+      overflow:hidden; display:flex; flex-direction:column; min-width:0;
+    }
+    .panel header {
+      padding:10px 14px; font-weight:600; border-bottom:1px solid #eee; background:#fff;
+      display:flex; align-items:center; gap:10px;
+    }
+    .panel main { flex:1; position:relative; background:#fff; }
+    iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+
+    /* Right editor + toolbar */
+    .toolbar {
+      display:flex; flex-wrap:wrap; gap:8px; padding:8px 10px; border-bottom:1px solid #eee; background:#fafafa;
+      align-items:center;
+    }
+    .btn {
+      padding:8px 12px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer; font-weight:600;
+    }
+    .btn:hover { background:#f0f0f0; }
+    .stat { margin-left:auto; color:#666; font-size:14px; }
+    .editor {
+      width:100%; height:calc(100% - 54px);
+      border:0; outline:none; resize:none; padding:16px 320px 16px 16px; box-sizing:border-box;
+      font-size:16px; line-height:1.6; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      overflow-y: auto;
+    }
+    .label { color:#444; font-size:14px; }
+    .fontsize { padding:6px 8px; border-radius:8px; border:1px solid #ddd; }
+    .link { color:#2b6cb0; text-decoration:none; }
+    
+    /* Iframe fallback placeholder */
+    .iframe-placeholder {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #f8f9fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px;
+      z-index: 10;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .iframe-placeholder.show {
+      visibility: visible;
+      opacity: 1;
+    }
+    .placeholder-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      color: #6c757d;
+    }
+    .placeholder-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 8px;
+    }
+    .placeholder-text {
+      color: #6c757d;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .placeholder-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s;
+    }
+    .placeholder-btn:hover {
+      background: #0056b3;
+      color: white;
+      text-decoration: none;
+    }
+    
+    /* Welcome popup modal */
+    .welcome-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    .welcome-overlay.show {
+      visibility: visible;
+      opacity: 1;
+    }
+    .welcome-modal {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+    .welcome-modal h1 {
+      margin: 0 0 24px 0;
+      color: #1a202c;
+      font-size: 28px;
+      font-weight: 600;
+      text-align: center;
+    }
+    .welcome-modal p {
+      margin: 0 0 16px 0;
+      line-height: 1.6;
+      color: #4a5568;
+      font-size: 16px;
+    }
+    .welcome-modal p:last-of-type {
+      margin-bottom: 24px;
+    }
+    .welcome-modal strong {
+      color: #2d3748;
+      font-weight: 600;
+    }
+    .welcome-close-btn {
+      width: 100%;
+      background: #3182ce;
+      color: white;
+      border: none;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .welcome-close-btn:hover {
+      background: #2c5aa0;
+    }
+    
+    /* Task popup card */
+    .task-popup {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        width: 280px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        padding: 16px 16px 36px 16px;
+        z-index: 1001;
+        border: 1px solid #e2e8f0;
+        pointer-events: none; 
+    }
+    .task-popup .next-btn {
+        pointer-events: auto;          /* ← 关键：按钮可点击 */
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        width: 24px;
+        height: 24px;
+        background: transparent;
+        color: #718096;
+        border: none;
+        border-radius: 4px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* ② 让编辑器右侧不再留出 320px 的空白 */
+    .editor {
+        width:100%;
+        height:calc(100% - 54px);
+        border:0;
+        outline:none;
+        resize:none;
+        padding:16px 16px 16px 16px;   /* ← 关键：右侧可写到边 */
+        box-sizing:border-box;
+        font-size:16px;
+        line-height:1.6;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        overflow-y:auto;
+    }
+    .task-popup h3 {
+      margin: 0 0 12px 0;
+      font-size: 18px;
+      color: #1a202c;
+      font-weight: 600;
+    }
+    .task-popup p {
+      margin: 0 0 16px 0;
+      color: #4a5568;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .task-popup .progress {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .task-popup .task-number {
+      font-size: 12px;
+      color: #718096;
+      font-weight: 500;
+    }
+    .next-btn {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      width: 24px;
+      height: 24px;
+      background: transparent;
+      color: #718096;
+      border: none;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .next-btn:hover {
+      background: rgba(113, 128, 150, 0.1);
+      color: #4a5568;
+    }
+    .next-btn:disabled {
+      color: #cbd5e0;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Left: embedded site -->
+    <section class="panel">
+      <header>
+        <span>DesignFriction</span>
+        <a class="link" href="https://designfriction.onrender.com" target="_blank" rel="noopener">Open in new tab</a>
+      </header>
+      <main>
+        <div class="iframe-placeholder" id="iframePlaceholder">
+          <div class="placeholder-icon">🌐</div>
+          <div class="placeholder-title">DesignFriction Interface</div>
+          <div class="placeholder-text">
+            The interface cannot be embedded directly.<br>
+            Please use the button below to open it in a new tab.
+          </div>
+          <a href="https://designfriction.onrender.com" target="_blank" class="placeholder-btn">
+            Open DesignFriction →
+          </a>
+        </div>
+        <iframe id="designFrictionIframe" src="https://designfriction.onrender.com" allow="clipboard-read; clipboard-write"></iframe>
+      </main>
+    </section>
+
+    <!-- Right: writing area -->
+    <section class="panel">
+      <header>Writing</header>
+      <main>
+        <div class="toolbar">
+          <button class="btn" id="copyBtn">Copy</button>
+          <button class="btn" id="downloadBtn">Download .txt</button>
+          <button class="btn" id="clearBtn">Clear</button>
+
+          <span class="label">Font size:</span>
+          <select id="fontSize" class="fontsize">
+            <option value="14">14px</option>
+            <option value="16" selected>16px</option>
+            <option value="18">18px</option>
+            <option value="20">20px</option>
+            <option value="24">24px</option>
+          </select>
+
+          <span class="stat" id="stat">0 words | 0 characters</span>
+        </div>
+
+        <textarea id="editor" class="editor" placeholder="Start writing here… (auto-saved locally; never uploaded)"></textarea>
+        
+        <!-- Task popup card -->
+        <div class="task-popup" id="taskPopup">
+          <div class="progress">
+            <span class="task-number" id="taskNumber">Task 1 of 16</span>
+          </div>
+          <h3 id="taskTitle">Complete your first task</h3>
+          <p id="taskDescription">Please write your thoughts about the design interface. Try to describe what you see and how you might interact with it.</p>
+          <button class="next-btn" id="nextTaskBtn">→</button>
+        </div>
+      </main>
+    </section>
+  </div>
+
+  <!-- Welcome popup modal -->
+  <div class="welcome-overlay" id="welcomeOverlay">
+    <div class="welcome-modal">
+      <h1>Welcome to Task 1</h1>
+      <p>In this task, you will work with eight different LLM writing models to complete a series of writing tasks.</p>
+      <p>The writing tasks will appear in the bottom-right corner of the screen. Please make sure to <strong>rely on AI assistance as MUCH as possible</strong> when completing your writing.</p>
+      <p>You may ask the AI to generate the content you need and then copy and paste it into your response. However, not all models will support copy–paste. In those cases, you should draw on the AI's ideas and rephrase them in your own words.</p>
+      <p>Your responses should be written in English and should contain approximately <strong>50–80 words</strong>.</p>
+      <button class="welcome-close-btn" id="welcomeCloseBtn">Start Task 1</button>
+    </div>
+  </div>
+
+  <script>
+    // Right editor logic
+    const KEY = 'df_writer_autosave_v1';
+    const editor = document.getElementById('editor');
+    const stat = document.getElementById('stat');
+    const copyBtn = document.getElementById('copyBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const fontSizeSel = document.getElementById('fontSize');
+
+    // Restore draft & font size
+    const saved = localStorage.getItem(KEY);
+    if (saved) editor.value = saved;
+    const savedFS = localStorage.getItem(KEY + '_fs');
+    if (savedFS) { fontSizeSel.value = savedFS; editor.style.fontSize = savedFS + 'px'; }
+    updateStat();
+
+    // Auto-save (local)
+    let timer;
+    editor.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => localStorage.setItem(KEY, editor.value), 300);
+      updateStat();
+    });
+
+    // Word/character count (rough: words by token, CJK by char)
+    function updateStat() {
+      const text = editor.value.trim();
+      const words = (text.match(/[\p{L}\p{N}_]+/gu) || []).length;
+      const chars = (text.replace(/\s/g, '')).length;
+      stat.textContent = `${words} words | ${chars} characters`;
+    }
+
+    // Copy
+    copyBtn.addEventListener('click', () => {
+      editor.select();
+      document.execCommand('copy');
+      editor.setSelectionRange(editor.value.length, editor.value.length);
+      flash(copyBtn, 'Copied');
+    });
+
+    // Download .txt
+    downloadBtn.addEventListener('click', () => {
+      let allContent = '';
+      const isCompleted = localStorage.getItem('df_tasks_completed') === 'true';
+      
+      // Include current task content if not completed
+      if (!isCompleted && editor.value.trim()) {
+        savedTasks[currentTask] = editor.value;
+      }
+      
+      // Build content with all tasks
+      for (let i = 0; i < savedTasks.length; i++) {
+        if (savedTasks[i] && savedTasks[i].trim()) {
+          const taskInfo = tasks[i];
+          const timingInfo = taskTimings[i];
+          
+          allContent += `=== Task ${i + 1} of ${tasks.length} ===\n`;
+          if (taskInfo && taskInfo.description) {
+            allContent += `Instructions:\n`;
+            const desc = Array.isArray(taskInfo.description) ? taskInfo.description : [taskInfo.description];
+            desc.forEach(line => {
+              allContent += `- ${line}\n`;
+            });
+            allContent += '\n';
+          }
+          
+          // Add timing information
+          if (timingInfo) {
+            allContent += `Timing:\n`;
+            allContent += `- Start time: ${timingInfo.startTime}\n`;
+            allContent += `- Duration: ${timingInfo.durationFormatted} (${timingInfo.duration}ms)\n\n`;
+          }
+          
+          allContent += `Response:\n${savedTasks[i]}\n\n`;
+          allContent += '=' + '='.repeat(40) + '\n\n';
+        }
+      }
+      
+      // If no saved content, use current editor content
+      if (!allContent.trim()) {
+        allContent = editor.value || 'No content to download.';
+      }
+      
+      const blob = new Blob([allContent], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      a.href = url; 
+      a.download = `writing-tasks-${timestamp}.txt`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      
+      flash(downloadBtn, 'Downloaded');
+    });
+
+    // Clear
+    clearBtn.addEventListener('click', () => {
+      if (!confirm('Clear all text? This cannot be undone.')) return;
+      editor.value = '';
+      localStorage.removeItem(KEY);
+      updateStat();
+    });
+
+    // Font size
+    fontSizeSel.addEventListener('change', () => {
+      editor.style.fontSize = fontSizeSel.value + 'px';
+      localStorage.setItem(KEY + '_fs', fontSizeSel.value);
+    });
+
+    function flash(btn, text) {
+      const old = btn.textContent;
+      btn.textContent = text;
+      setTimeout(() => (btn.textContent = old), 900);
+    }
+
+    // Format duration in milliseconds to readable string
+    function formatDuration(ms) {
+      const seconds = Math.floor(ms / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      
+      if (hours > 0) {
+        return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
+      } else if (minutes > 0) {
+        return `${minutes}m ${seconds % 60}s`;
+      } else {
+        return `${seconds}s`;
+      }
+    }
+
+    /* ===== 你的 Latin square 函数（加了 let 避免全局变量泄漏）===== */
+// 生成 Latin square
+function latinSquare(array, participantId) {
+  let result = [];
+  // Based on "Bradley, J. V. Complete counterbalancing of immediate sequential effects in a Latin square design. J. Amer. Statist. Ass.,.1958, 53, 525-528."
+  for (var i = 0, j = 0, h = 0; i < array.length; ++i) {
+    var val = 0;
+    if (i < 2 || i % 2 != 0) {
+      val = j++;
+    } else {
+      val = array.length - h - 1;
+      ++h;
+    }
+    var idx = (val + participantId) % array.length;
+    result.push(array[idx]);
+  }
+  if (array.length % 2 != 0 && participantId % 2 != 0) {
+    result = result.reverse();
+  }
+  return result;
+}
+
+/* ===== 8 个 modal ===== */
+const MODALS = [
+    "ChatGPT",
+  "HoldReveal",
+  "ThinkMultiplier",
+  "Timer Lockout",
+  "Elenchus",
+  "Less is More",
+  "Numbered Points",
+  "Usage Mirror"
+];
+
+/* ===== 16 个写作主题（不含 modal）===== */
+const TOPICS = [
+  "Write about crime and its common social causes.",
+  "Write about poverty as a factor that influences crime.",
+  "Write about education level and its relationship to crime.",
+  "Write about unemployment and its connection to crime.",
+  "Write about drug use or addiction as a cause of criminal behavior.",
+  "Write about psychological factors that contribute to crime.",
+  "Write about the main purposes of punishment in the justice system.",
+  "Write about rehabilitation compared to punishment in criminal justice.",
+  "Write about the death penalty and reasons why some countries use it while others do not.",
+  "Write about community service as an alternative form of punishment.",
+  "Write about restorative justice and how it works.",
+  "Write about the challenges of running a prison system.",
+  "Write about the impact of crime on local communities.",
+  "Write about government investment in crime prevention programs.",
+  "Write about examples of successful crime prevention strategies.",
+  "Write about technology in preventing or solving crimes."
+];
+
+/* ===== 参与者行号：URL ?pid=0..7 或 localStorage（默认 0）===== */
+const LSKEY_PID = "df_participant_row";
+let participantId = Number(new URLSearchParams(location.search).get("pid"));
+if (!Number.isInteger(participantId) || participantId < 0 || participantId >= MODALS.length) {
+  const savedPid = Number(localStorage.getItem(LSKEY_PID));
+  participantId = (Number.isInteger(savedPid) && savedPid >= 0 && savedPid < MODALS.length) ? savedPid : 0;
+}
+
+// Check if participant ID changed - if so, clear previous data
+const previousPid = localStorage.getItem(LSKEY_PID);
+if (previousPid !== null && Number(previousPid) !== participantId) {
+  console.log('Participant ID changed from', previousPid, 'to', participantId, '- clearing previous data');
+  // Clear all task-related data
+  localStorage.removeItem('df_current_task');
+  localStorage.removeItem('df_saved_tasks');
+  localStorage.removeItem('df_tasks_completed');
+  localStorage.removeItem('df_task_timings');
+  localStorage.removeItem('df_welcome_shown');
+  localStorage.removeItem('df_writer_autosave_v1');
+  localStorage.removeItem('df_writer_autosave_v1_fs');
+}
+
+localStorage.setItem(LSKEY_PID, participantId);
+
+/* ===== 得到该参与者的 modal 顺序（长度 8），用于 16 个任务循环两遍 ===== */
+const modalSequence = latinSquare(MODALS, participantId);
+
+/* ===== 生成最终 tasks：每条只有 bullet 列表 ===== */
+const tasks = TOPICS.map((topic, idx) => {
+  const modalName = modalSequence[idx % modalSequence.length];
+  return {
+    description: [
+      `Switch to the ${modalName} modal;`,
+      topic
+    ]
+  };
+});
+
+    let currentTask = 0;
+    const savedTasks = []; // Store content for each completed task
+    const taskTimings = []; // Store timing data for each task
+    let currentTaskStartTime = null; // Track when current task started
+    const taskPopup = document.getElementById('taskPopup');
+    const taskNumber = document.getElementById('taskNumber');
+    const taskTitle = document.getElementById('taskTitle');
+    const taskDescription = document.getElementById('taskDescription');
+    const nextTaskBtn = document.getElementById('nextTaskBtn');
+
+    // Initialize task display
+    function updateTaskDisplay() {
+      
+      const isCompleted = localStorage.getItem('df_tasks_completed') === 'true';
+      
+      if (currentTask < tasks.length && !isCompleted) {
+        // Normal task display
+        taskPopup.style.display = 'block';
+        taskNumber.textContent = `Task ${currentTask + 1} of ${tasks.length}`;
+        taskTitle.style.display = 'none';
+
+        // 渲染 description（数组 → <ul><li>...）
+        const desc = tasks[currentTask].description;
+        taskDescription.innerHTML = ""; // 清空
+        const ul = document.createElement('ul');
+        ul.style.margin = "0";
+        ul.style.paddingLeft = "18px";
+        (Array.isArray(desc) ? desc : [String(desc)]).forEach(line => {
+          const li = document.createElement('li');
+          li.textContent = line;
+          ul.appendChild(li);
+        });
+        taskDescription.appendChild(ul);
+
+        nextTaskBtn.style.display = 'block';
+        nextTaskBtn.textContent = '→';
+        
+        // Start timing for this task
+        if (currentTaskStartTime === null) {
+          currentTaskStartTime = Date.now();
+          console.log('Started timing for task', currentTask + 1);
+        }
+      } else {
+        // Completion state
+        taskPopup.style.display = 'block';
+        taskNumber.textContent = 'All Tasks Completed!';
+        taskTitle.style.display = 'none';
+        
+        taskDescription.innerHTML = '<p style="margin: 0; color: #28a745; font-weight: 500;">🎉 Great job! You have completed all 16 writing tasks.<br><br>Click the restart button to begin again.</p>';
+        
+        nextTaskBtn.style.display = 'block';
+        nextTaskBtn.textContent = '↺';
+        nextTaskBtn.title = 'Restart all tasks';
+      }
+    }
+
+
+    // Handle next task button
+    nextTaskBtn.addEventListener('click', () => {
+      const isCompleted = localStorage.getItem('df_tasks_completed') === 'true';
+      
+      if (isCompleted) {
+        // Restart functionality
+        currentTask = 0;
+        savedTasks.length = 0; // Clear saved tasks
+        taskTimings.length = 0; // Clear timing data
+        currentTaskStartTime = null; // Reset current task timer
+        editor.value = '';
+        updateStat();
+        
+        // Clear completion state and saved data
+        localStorage.removeItem('df_tasks_completed');
+        localStorage.setItem('df_current_task', '0');
+        localStorage.removeItem('df_saved_tasks');
+        localStorage.removeItem('df_task_timings');
+        
+        updateTaskDisplay();
+      } else {
+        // Normal next task functionality
+        // Calculate and save timing for current task
+        if (currentTaskStartTime !== null) {
+          const duration = Date.now() - currentTaskStartTime;
+          taskTimings[currentTask] = {
+            startTime: new Date(currentTaskStartTime).toISOString(),
+            duration: duration,
+            durationFormatted: formatDuration(duration)
+          };
+          console.log(`Task ${currentTask + 1} completed in ${taskTimings[currentTask].durationFormatted}`);
+          currentTaskStartTime = null;
+        }
+        
+        // Save current content
+        savedTasks[currentTask] = editor.value;
+        
+        // Move to next task
+        currentTask++;
+        
+        // Check if all tasks completed
+        if (currentTask >= tasks.length) {
+          localStorage.setItem('df_tasks_completed', 'true');
+        }
+        
+        // Clear editor for new task
+        editor.value = '';
+        updateStat();
+        
+        // Update task display
+        updateTaskDisplay();
+        
+        // Save progression state
+        localStorage.setItem('df_current_task', currentTask);
+        localStorage.setItem('df_saved_tasks', JSON.stringify(savedTasks));
+        localStorage.setItem('df_task_timings', JSON.stringify(taskTimings));
+      }
+    });
+
+    // Restore task progression on page load
+    const savedTaskIndex = localStorage.getItem('df_current_task');
+    const savedTaskContent = localStorage.getItem('df_saved_tasks');
+    const savedTaskTimings = localStorage.getItem('df_task_timings');
+    const isCompleted = localStorage.getItem('df_tasks_completed') === 'true';
+    
+    // Check if this is a participant ID change (data was cleared)
+    const wasDataCleared = previousPid !== null && Number(previousPid) !== participantId;
+    
+    if (wasDataCleared) {
+      // Data was cleared due to participant change - start fresh
+      console.log('Starting fresh for new participant');
+      currentTask = 0;
+      savedTasks.length = 0;
+      taskTimings.length = 0;
+      editor.value = '';
+    } else if (isCompleted) {
+      // If tasks were completed, show completion state
+      currentTask = tasks.length; // Set to completion state
+    } else if (savedTaskIndex) {
+      currentTask = parseInt(savedTaskIndex, 10);
+      // Ensure currentTask doesn't exceed array bounds
+      if (currentTask >= tasks.length) {
+        currentTask = 0;
+      }
+    }
+    
+    if (savedTaskContent && !wasDataCleared) {
+      try {
+        savedTasks.push(...JSON.parse(savedTaskContent));
+      } catch (e) {
+      }
+    }
+    
+    if (savedTaskTimings && !wasDataCleared) {
+      try {
+        taskTimings.push(...JSON.parse(savedTaskTimings));
+      } catch (e) {
+      }
+    }
+    
+    // Welcome popup logic
+    const welcomeOverlay = document.getElementById('welcomeOverlay');
+    const welcomeCloseBtn = document.getElementById('welcomeCloseBtn');
+    const welcomeShownKey = 'df_welcome_shown';
+    
+    // Show welcome popup on first visit or when participant changed
+    const hasShownWelcome = localStorage.getItem(welcomeShownKey);
+    if (!hasShownWelcome || wasDataCleared) {
+      // Show welcome popup and hide task popup initially
+      welcomeOverlay.classList.add('show');
+      taskPopup.style.display = 'none';
+    } else {
+      // Show task popup normally
+      updateTaskDisplay();
+    }
+    
+    // Handle welcome close button
+    welcomeCloseBtn.addEventListener('click', () => {
+      welcomeOverlay.classList.remove('show');
+      localStorage.setItem(welcomeShownKey, 'true');
+      updateTaskDisplay();
+    });
+    
+    // If welcome was already shown and data wasn't cleared, update task display
+    if (hasShownWelcome && !wasDataCleared) {
+      updateTaskDisplay();
+    }
+
+    // Iframe fallback detection (only for actual network errors)
+    const iframe = document.getElementById('designFrictionIframe');
+    const placeholder = document.getElementById('iframePlaceholder');
+
+    // Only show placeholder on actual iframe errors (network failures, etc.)
+    iframe.addEventListener('error', () => {
+      console.log('Iframe failed to load - showing placeholder');
+      placeholder.classList.add('show');
+    });
+  </script>
+</body>
+</html>

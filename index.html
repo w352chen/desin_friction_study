@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>SketchBug Study</title>
+  <title>Design Friction for LLM Writing</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -10,14 +10,12 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       background: #f9f9f9;
       margin: 0;
     }
 
-    h1 {
-      margin-bottom: 40px;
-    }
+    h1 { margin: 32px 0; }
 
     .participant-form {
       background: white;
@@ -29,18 +27,11 @@
       min-width: 400px;
     }
 
-    .form-group {
-      margin-bottom: 20px;
-    }
+    .form-group { margin-bottom: 20px; }
 
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-      color: #333;
-    }
+    label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
 
-    input[type="text"] {
+    input[type="text"], input[type="number"] {
       width: 100%;
       padding: 12px;
       border: 2px solid #ddd;
@@ -49,10 +40,7 @@
       box-sizing: border-box;
     }
 
-    input[type="text"]:focus {
-      outline: none;
-      border-color: #007BFF;
-    }
+    input[type="text"]:focus, input[type="number"]:focus { outline: none; border-color: #007BFF; }
 
     select {
       width: 100%;
@@ -64,10 +52,7 @@
       background-color: white;
     }
 
-    select:focus {
-      outline: none;
-      border-color: #007BFF;
-    }
+    select:focus { outline: none; border-color: #007BFF; }
 
     .btn {
       background-color: #007BFF;
@@ -80,32 +65,14 @@
       transition: background-color 0.2s;
     }
 
-    .btn:hover {
-      background-color: #0056b3;
-    }
+    .btn:hover { background-color: #0056b3; }
+    .btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
-    .btn:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
+    .study-links { display: none; }
+    .study-links.show { display: block; }
 
-    .study-links {
-      display: none;
-    }
-
-    .study-links.show {
-      display: block;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    li {
-      margin: 15px 0;
-      list-style: none;
-    }
+    ul { list-style: none; padding: 0; }
+    li { margin: 15px 0; list-style: none; }
 
     a {
       text-decoration: none;
@@ -138,42 +105,35 @@
       text-align: center;
     }
 
-    .change-id {
-      background: none;
-      border: none;
-      color: #007BFF;
-      cursor: pointer;
-      text-decoration: underline;
-      font-size: 14px;
-    }
-
-
+    .change-id { background: none; border: none; color: #007BFF; cursor: pointer; text-decoration: underline; font-size: 14px; }
   </style>
 </head>
 <body>
 
-  <h1>Welcome to the SketchBug Study</h1>
+  <h1>Welcome to the LLM Writing Study</h1>
 
   <!-- Participant ID Form -->
   <div id="participantForm" class="participant-form">
-    <!-- <h2>Please Enter Your Participant ID</h2> -->
     <div class="form-group">
-      <!-- <label for="participantId">Participant ID:</label> -->
-      <input type="text" id="participantId" placeholder="Enter your participant ID" required>
+      <input type="number" id="participantId" placeholder="Enter your participant ID" required>
     </div>
     
     <div class="form-group">
-      <label for="experimentCondition">Experiment Condition:</label>
+      <label for="experimentCondition">Condition:</label>
       <select id="experimentCondition" required>
-        <option value="">Select condition...</option>
-        <option value="condition1">Condition 1: Sketch+Task1, Keyboard+Task2</option>
-        <option value="condition2">Condition 2: Keyboard+Task2, Sketch+Task1</option>
-        <option value="condition3">Condition 3: Sketch+Task2, Keyboard+Task1</option>
-        <option value="condition4">Condition 4: Keyboard+Task1, Sketch+Task2</option>
+        <option value="">Select a Condition...</option>
+        <option value="0">A, B, H, C, G, D, F, E</option>
+        <option value="1">B, C, A, D, H, E, G, F</option>
+        <option value="2">C, D, B, E, A, F, H, G</option>
+        <option value="3">D, E, C, F, B, G, A, H</option>
+        <option value="4">E, F, D, G, C, H, B, A</option>
+        <option value="5">F, G, E, H, D, A, C, B</option>
+        <option value="6">G, H, F, A, E, B, D, C</option>
+        <option value="7">H, A, G, B, F, C, E, D</option>
       </select>
     </div>
     
-    <button class="btn" onclick="setParticipantId()">Continue</button>
+    <button class="btn" id="continueBtn">Continue</button>
   </div>
 
   <!-- Study Links (hidden initially) -->
@@ -184,349 +144,117 @@
       <button class="change-id" onclick="changeParticipantId()">Change ID</button>
     </div>
 
-    <ul id="taskList">
-      <!-- Task links will be dynamically generated based on condition -->
-    </ul>
+    <ul id="taskList"></ul>
   </div>
 
   <script>
-    // Check if participant ID is already stored
-    document.addEventListener('DOMContentLoaded', function() {
-      const storedId = localStorage.getItem('participant_id');
-      const storedCondition = localStorage.getItem('experiment_condition');
-      if (storedId && storedCondition) {
-        showStudyLinks(storedId, storedCondition);
-      }
-    });
+  // Latin square rows (Phase 1 only)
+  const LATIN_SQUARE = [
+    ['A','B','H','C','G','D','F','E'],
+    ['B','C','A','D','H','E','G','F'],
+    ['C','D','B','E','A','F','H','G'],
+    ['D','E','C','F','B','G','A','H'],
+    ['E','F','D','G','C','H','B','A'],
+    ['F','G','E','H','D','A','C','B'],
+    ['G','H','F','A','E','B','D','C'],
+    ['H','A','G','B','F','C','E','D'],
+  ];
 
-    function setParticipantId() {
-      const participantId = document.getElementById('participantId').value.trim();
-      const experimentCondition = document.getElementById('experimentCondition').value;
-      
+  // Hash any string to a 0..7 column index; if numeric, use (n-1) % 8
+  function idToCol(idStr){
+    const n = Number(idStr);
+    if(Number.isFinite(n)){
+      return ((Math.floor(n) - 1) % 8 + 8) % 8;
+    }
+    // simple string hash
+    let h = 0;
+    for(let i=0;i<idStr.length;i++) h = (h*31 + idStr.charCodeAt(i))|0;
+    return ((h % 8) + 8) % 8;
+  }
+
+  function phase1ConditionFor(rowIndex, participantId) {
+    const col = idToCol(participantId);
+    return LATIN_SQUARE[rowIndex][col];
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const storedId = localStorage.getItem('participant_id');
+    const storedRow = localStorage.getItem('phase1_row');
+    const storedCondition = localStorage.getItem('phase1_condition');
+    if (storedId && storedRow !== null && storedCondition) {
+      showStudyLinks(storedId, Number(storedRow), storedCondition);
+    }
+
+    document.getElementById('continueBtn').addEventListener('click', setParticipantId);
+  });
+
+  function setParticipantId() {
+    try{
+      const idEl = document.getElementById('participantId');
+      const rowEl = document.getElementById('experimentCondition');
+      const participantId = (idEl.value || '').trim();
+      let rowIndex = rowEl.value === '' ? null : Number(rowEl.value);
+
       if (!participantId) {
         alert('Please enter a participant ID');
         return;
       }
-
-      if (!experimentCondition) {
-        alert('Please select an experiment condition');
-        return;
+      // default to Row 1 if user didn't pick a row yet
+      if (!Number.isInteger(rowIndex)) {
+        rowIndex = 0;
+        rowEl.value = '0';
       }
 
-      // Clear ALL previous participant data to ensure clean slate
-      clearAllParticipantData();
+      const cond = phase1ConditionFor(rowIndex, participantId);
 
-      // Store new participant ID and experiment condition in localStorage
+      ['participant_id','participant_start_time','phase1_row','phase1_condition'].forEach(key => localStorage.removeItem(key));
+
       localStorage.setItem('participant_id', participantId);
-      localStorage.setItem('experiment_condition', experimentCondition);
+      localStorage.setItem('phase1_row', String(rowIndex));
+      localStorage.setItem('phase1_condition', cond);
       localStorage.setItem('participant_start_time', new Date().toISOString());
-      
-      console.log('New participant session started:', participantId);
-      console.log('Experiment condition:', experimentCondition);
-      console.log('All previous data cleared for clean session');
-      showStudyLinks(participantId, experimentCondition);
+
+      showStudyLinks(participantId, rowIndex, cond);
+    }catch(err){
+      console.error('Continue failed:', err);
+      alert('An error occurred. Please check the console for details.');
     }
+  }
 
-    function clearAllParticipantData() {
-      // List of all possible data keys to clear
-      const dataKeys = [
-        // Participant info
-        'participant_id',
-        'participant_start_time',
-        'experiment_condition',
-        
-        // Task data
-        'stepover_stop_task1_start_time',
-        'stepover_stop_task1_end_time',
-        'stepover_stop_task1_duration_seconds',
-        'stepover_stop_task1_rating',
-        
-        'breakpoint_start_task_start_time',
-        'breakpoint_start_task_end_time',
-        'breakpoint_start_task_duration_seconds',
-        'breakpoint_start_task_rating',
-        
-        'continue_task_start_time',
-        'continue_task_end_time',
-        'continue_task_duration_seconds',
-        'continue_task_rating',
-        
-        'stepinto_task_start_time',
-        'stepinto_task_end_time',
-        'stepinto_task_duration_seconds',
-        'stepinto_task_rating',
-        
-        'stepout_task_start_time',
-        'stepout_task_end_time',
-        'stepout_task_duration_seconds',
-        'stepout_task_rating',
-        
-        'task1_start_time',
-        'task1_end_time',
-        'task1_duration_seconds',
-        'task1_rating',
-        
-        'breakpoint_start_task2_start_time',
-        'breakpoint_start_task2_end_time',
-        'breakpoint_start_task2_duration_seconds',
-        'breakpoint_start_task2_rating',
-        
-        'continue_task2_start_time',
-        'continue_task2_end_time',
-        'continue_task2_duration_seconds',
-        'continue_task2_rating',
-        
-        'stepinto_task2_start_time',
-        'stepinto_task2_end_time',
-        'stepinto_task2_duration_seconds',
-        'stepinto_task2_rating',
-        
-        'stepout_task2_start_time',
-        'stepout_task2_end_time',
-        'stepout_task2_duration_seconds',
-        'stepout_task2_rating',
-        
-        'stepover_stop_task2_start_time',
-        'stepover_stop_task2_end_time',
-        'stepover_stop_task2_duration_seconds',
-        'stepover_stop_task2_rating',
-        
-        'task2_start_time',
-        'task2_end_time',
-        'task2_duration_seconds',
-        'task2_rating',
+  function showStudyLinks(participantId, rowIndex, phase1Condition) {
+    document.getElementById('participantForm').style.display = 'none';
+    document.getElementById('studyLinks').classList.add('show');
+    document.getElementById('displayParticipantId').textContent = participantId;
+    document.getElementById('displayCondition').textContent = `${rowIndex + 1}`;
+    generateTaskList(phase1Condition);
+  }
 
-        'task3_start_time',
-        'task3_end_time',
-        'task3_duration_seconds',
-        'task3_rating'
-      ];
+  function generateTaskList(phase1Condition) {
+    const taskList = document.getElementById('taskList');
+    taskList.innerHTML = '';
 
-      // Clear all participant data
-      dataKeys.forEach(key => {
-        localStorage.removeItem(key);
-      });
+    // Get the stored row index for the participant ID parameter
+    const rowIndex = localStorage.getItem('phase1_row');
+    const participantId = localStorage.getItem('participant_id');
+    
+    const links = [
+      `<li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_bHhEXxbTZX7pVaK" target="_blank">📋 Pre-Questionnaire</a></li>`,
+      `<li><a href="phase1.html?pid=${rowIndex}" target="_blank">✍️ Task 1</a></li>`,
+      `<li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_3jv5E9hMrwBemHA" target="_blank">📋 Post-Questionnaire-Task 1</a></li>`,
+      `<li><a href="phase2.html" target="_blank">🧮 Task 2</a></li>`,
+      `<li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_9Riw80U7jj7891k" target="_blank">✍️ Task 3</a></li>`,
+    ];
 
-      console.log('Cleared all participant data keys:', dataKeys.length, 'items');
-    }
+    taskList.innerHTML = links.join('');
+  }
 
-    function showStudyLinks(participantId, experimentCondition) {
-      document.getElementById('participantForm').style.display = 'none';
-      document.getElementById('studyLinks').classList.add('show');
-      document.getElementById('displayParticipantId').textContent = participantId;
-      document.getElementById('displayCondition').textContent = getConditionDescription(experimentCondition);
-      
-      generateTaskList(experimentCondition);
-    }
-
-    function getConditionDescription(condition) {
-      const descriptions = {
-        'condition1': 'Sketch+Task1, Keyboard+Task2',
-        'condition2': 'Keyboard+Task2, Sketch+Task1', 
-        'condition3': 'Sketch+Task2, Keyboard+Task1',
-        'condition4': 'Keyboard+Task1, Sketch+Task2'
-      };
-      return descriptions[condition] || condition;
-    }
-
-    function generateTaskList(experimentCondition) {
-      const taskList = document.getElementById('taskList');
-      taskList.innerHTML = '';
-
-      // Common tasks that appear in all conditions
-      const commonTasks = [
-        '<li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_emOP8hXwSR2lF2e" target="_blank">📋 Pre-Questionnaire</a></li>'
-      ];
-
-      // Condition-specific task sequences
-      const conditionTasks = {
-        'condition1': [
-          // Sketch + Task 1, then Keyboard + Task 2
-          '<li><a href="tutorial_sketch_break_start.html" target="_blank">📖 Tutorial: Sketch Mode</a></li>',
-          '<li><a href="task1.html" target="_blank">🧩 Task 1 (Sketch Mode)</a></li>',
-          '<li><a href="tutorial_keyboard_break_start.html" target="_blank">📖 Tutorial: Keyboard Mode</a></li>',
-          '<li><a href="task2.html" target="_blank">🧩 Task 2 (Keyboard Mode)</a></li>'
-        ],
-        'condition2': [
-          // Keyboard + Task 2, then Sketch + Task 1  
-          '<li><a href="tutorial_keyboard_break_start.html" target="_blank">📖 Tutorial: Keyboard Mode</a></li>',
-          '<li><a href="task2.html" target="_blank">🧩 Task 2 (Keyboard Mode)</a></li>',
-          '<li><a href="tutorial_sketch_break_start.html" target="_blank">📖 Tutorial: Sketch Mode</a></li>',
-          '<li><a href="task1.html" target="_blank">🧩 Task 1 (Sketch Mode)</a></li>'
-        ],
-        'condition3': [
-          // Sketch + Task 2, then Keyboard + Task 1
-          '<li><a href="tutorial_sketch_break_start.html" target="_blank">📖 Tutorial: Sketch Mode</a></li>',
-          '<li><a href="task2.html" target="_blank">🧩 Task 2 (Sketch Mode)</a></li>',
-          '<li><a href="tutorial_keyboard_break_start.html" target="_blank">📖 Tutorial: Keyboard Mode</a></li>',
-          '<li><a href="task1.html" target="_blank">🧩 Task 1 (Keyboard Mode)</a></li>'
-        ],
-        'condition4': [
-          // Keyboard + Task 1, then Sketch + Task 2
-          '<li><a href="tutorial_keyboard_break_start.html" target="_blank">📖 Tutorial: Keyboard Mode</a></li>',
-          '<li><a href="task1.html" target="_blank">🧩 Task 1 (Keyboard Mode)</a></li>',
-          '<li><a href="tutorial_sketch_break_start.html" target="_blank">📖 Tutorial: Sketch Mode</a></li>',
-          '<li><a href="task2.html" target="_blank">🧩 Task 2 (Sketch Mode)</a></li>'
-        ]
-      };
-
-      // Final tasks
-      const finalTasks = [
-        '<li><a href="#" onclick="downloadCSV(); return false;">📥 Download CSV</a></li>',
-        '<li><a href="task3.html" target="_blank">🧩 Task 3 (Combined Mode)</a></li>',
-        '<li><a href="https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_0UGYQWVVHOmEgSi" target="_blank">📋 Post-Questionnaire</a></li>'
-      ];
-
-      // Combine all tasks
-      const allTasks = [
-        ...commonTasks,
-        ...(conditionTasks[experimentCondition] || []),
-        ...finalTasks
-      ];
-
-      taskList.innerHTML = allTasks.join('');
-    }
-
-    function changeParticipantId() {
-      const currentId = localStorage.getItem('participant_id');
-      const hasData = checkIfHasAnyData();
-      
-      let confirmMessage = 'Are you sure you want to change the participant ID?';
-      if (hasData) {
-        confirmMessage += '\n\n⚠️ WARNING: This will clear ALL existing study data for the current participant (' + currentId + ').\n\nThis action cannot be undone!';
-      }
-      
-      if (confirm(confirmMessage)) {
-        document.getElementById('participantForm').style.display = 'block';
-        document.getElementById('studyLinks').classList.remove('show');
-        document.getElementById('participantId').value = '';
-        document.getElementById('participantId').focus();
-        
-        if (hasData) {
-          console.log('User confirmed changing participant ID - data will be cleared when new ID is set');
-        }
-      }
-    }
-
-    function checkIfHasAnyData() {
-      // Check if any task data exists
-      const taskKeys = [
-        'task1_start_time', 'task2_start_time', 'task3_start_time',
-        'stepover_stop_task1_start_time', 'breakpoint_start_task_start_time',
-        'continue_task_start_time', 'stepinto_task_start_time',
-        'stepout_task_start_time'
-      ];
-      
-      return taskKeys.some(key => localStorage.getItem(key) !== null);
-    }
-
-    function downloadCSV() {
-      const participantId = localStorage.getItem('participant_id') || 'Unknown';
-      
-      if (!participantId || participantId === 'Unknown') {
-        alert('Please set a participant ID first!');
-        return;
-      }
-
-      console.log(`📥 Downloading CSV for participant: ${participantId}`);
-      console.log(`🔒 Data isolation verified - CSV contains ONLY data for participant: ${participantId}`);
-
-      // Collect all data
-      const data = getAllTaskData();
-      
-      if (data.length === 0) {
-        alert('No task data found to download. Please complete some tasks first.');
-        return;
-      }
-
-      // Generate CSV content
-      const headers = [
-        'Participant ID',
-        'Experiment Condition',
-        'Participant Start Time',
-        'Task Name',
-        'Start Time',
-        'End Time', 
-        'Duration (seconds)',
-        'Duration (minutes)',
-        'Success Rating'
-      ];
-
-      let csvContent = headers.join(',') + '\n';
-      
-      data.forEach(row => {
-        csvContent += row.join(',') + '\n';
-      });
-
-      // Create and download file
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      
-      const now = new Date();
-      const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
-      const filename = `study_results_${participantId}_${dateStr}.csv`;
-      
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      console.log(`✅ CSV downloaded: ${filename}`);
-      alert(`✅ CSV file downloaded successfully!\nFile: ${filename}`);
-    }
-
-    function getAllTaskData() {
-      const participantId = localStorage.getItem('participant_id') || 'Unknown';
-      const experimentCondition = localStorage.getItem('experiment_condition') || 'Unknown';
-      const participantStartTime = localStorage.getItem('participant_start_time') || '';
-      const data = [];
-
-      // Define all possible tasks
-      const tasks = [
-        'stepover_stop_task1',
-        'breakpoint_start_task', 
-        'continue_task',
-        'stepinto_task',
-        'stepout_task',
-        'task1',
-        'breakpoint_start_task2',
-        'continue_task2', 
-        'stepinto_task2',
-        'stepout_task2',
-        'stepover_stop_task2',
-        'task2',
-        'task3'
-      ];
-
-      tasks.forEach(taskName => {
-        const startTime = localStorage.getItem(`${taskName}_start_time`);
-        const endTime = localStorage.getItem(`${taskName}_end_time`);
-        const durationSeconds = localStorage.getItem(`${taskName}_duration_seconds`);
-        const rating = localStorage.getItem(`${taskName}_rating`);
-
-        if (startTime || endTime || durationSeconds || rating) {
-          const durationMinutes = durationSeconds ? Math.round(parseFloat(durationSeconds) / 60 * 100) / 100 : '';
-          
-          data.push([
-            participantId,
-            experimentCondition,
-            participantStartTime,
-            taskName,
-            startTime || '',
-            endTime || '',
-            durationSeconds || '',
-            durationMinutes || '',
-            rating || ''
-          ]);
-        }
-      });
-
-      return data;
-    }
-  </script>
+  function changeParticipantId() {
+    document.getElementById('participantForm').style.display = 'block';
+    document.getElementById('studyLinks').classList.remove('show');
+    document.getElementById('participantId').value = '';
+    document.getElementById('participantId').focus();
+  }
+</script>
 
 </body>
 </html>

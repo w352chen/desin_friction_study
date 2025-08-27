@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Phase 2 – Mental Arithmetic</title>
+  <style>
+    body {margin:0; font-family: Arial, Helvetica, sans-serif; background:#ffffff; color:#111; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh;}
+    h1 {font-size:2rem; margin-bottom:20px; position:absolute; top:40px;}
+    .instruction {font-size:1.1rem; color:#555; margin-bottom:60px; max-width:800px; text-align:center; line-height:1.5; background:#f1f5f9; padding:12px 30px; border-radius:8px; position:absolute; top:100px;}
+    .question-area {display:flex; align-items:center; gap:12px; justify-content:center;}
+    .question {font-size:2.2rem;}
+    #answer {border:none; border-bottom:2px solid #111; font-size:1.6rem; text-align:center; width:200px; padding:6px;}
+    #answer:focus {outline:none; border-color:#2563eb;}
+    .btn {background:#2563eb; color:#fff; border:0; padding:10px 18px; border-radius:6px; font-weight:700; font-size:1rem; cursor:pointer;}
+    .hidden {display:none}
+    .done {font-size:1.3rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap:20px;}
+  </style>
+</head>
+<body>
+  <h1>Phase 2</h1>
+  <p class="instruction">Complete the following questions and press <strong>Enter</strong> or click the <strong>Next</strong> button to continue.</p>
+
+  <div id="quiz">
+    <div class="question-area">
+      <div class="question" id="question">62 + 29 =</div>
+      <input id="answer" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
+      <button class="btn" id="nextBtn">Next</button>
+    </div>
+  </div>
+
+  <div id="done" class="hidden">
+    <p class="done"><strong>All done!</strong> Thank you for completing the task.</p>
+    <div style="display:flex; justify-content:center; width:100%;">
+      <button class="btn" id="completeBtn">Complete</button>
+    </div>
+  </div>
+
+  <script>
+    const TOTAL = 50;
+    const RANGE_ADD_SUB = [1, 99];
+    const RANGE_MUL = [2, 12];
+    const rndInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    function makeAddition(){const a=rndInt(...RANGE_ADD_SUB),b=rndInt(...RANGE_ADD_SUB);return {a,b,op:'+',ans:a+b};}
+    function makeSubtraction(){const a=rndInt(...RANGE_ADD_SUB),b=rndInt(...RANGE_ADD_SUB);const big=Math.max(a,b),small=Math.min(a,b);return {a:big,b:small,op:'-',ans:big-small};}
+    function makeMultiplication(){const a=rndInt(...RANGE_MUL),b=rndInt(...RANGE_MUL);return {a,b,op:'×',ans:a*b};}
+    function makeDivision(){const b=rndInt(...RANGE_MUL),q=rndInt(...RANGE_MUL),a=b*q;return {a,b,op:'÷',ans:q};}
+    function makeQuestion(){const pick=rndInt(1,4);if(pick===1) return makeAddition();if(pick===2) return makeSubtraction();if(pick===3) return makeMultiplication();return makeDivision();}
+
+    const QUESTIONS = Array.from({length: TOTAL}, makeQuestion);
+    let index=0; const answers=Array(TOTAL).fill(null);
+
+    const questionEl=document.getElementById('question');
+    const answerEl=document.getElementById('answer');
+    const nextBtn=document.getElementById('nextBtn');
+    const quizEl=document.getElementById('quiz');
+    const doneEl=document.getElementById('done');
+    const completeBtn=document.getElementById('completeBtn');
+
+    function render(){
+      if(index>=TOTAL){quizEl.classList.add('hidden');doneEl.classList.remove('hidden');return;}
+      const q=QUESTIONS[index];
+      questionEl.textContent=`${q.a} ${q.op} ${q.b} =`;
+      answerEl.value='';
+      answerEl.focus();
+    }
+
+    function recordAndNext(){
+      const val=answerEl.value.trim();
+      if(val===''){
+        alert('Please enter an answer before proceeding.');
+        answerEl.focus();
+        return;
+      }
+      answers[index]=Number(val);
+      index+=1;
+      render();
+    }
+
+    nextBtn.addEventListener('click',recordAndNext);
+    answerEl.addEventListener('keydown',(e)=>{if(e.key==='Enter'||e.key==='Return'){e.preventDefault();recordAndNext();}});
+
+    if(completeBtn){
+      completeBtn.addEventListener('click',()=>{
+        window.location.href = 'index.html';
+      });
+    }
+
+    render();
+  </script>
+</body>
+</html>

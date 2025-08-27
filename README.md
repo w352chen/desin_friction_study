@@ -1,1 +1,1 @@
-# sketch_study
+# design_friction_study
