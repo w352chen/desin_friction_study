@@ -301,7 +301,7 @@
         <div class="toolbar">
           <button class="btn" id="copyBtn">Copy</button>
           <button class="btn" id="downloadBtn">Download .txt</button>
-          <button class="btn" id="clearBtn">Clear</button>
+          <!-- <button class="btn" id="clearBtn">Clear</button> -->
 
           <span class="label">Font size:</span>
           <select id="fontSize" class="fontsize">
@@ -315,7 +315,7 @@
           <span class="stat" id="stat">0 words | 0 characters</span>
         </div>
 
-        <textarea id="editor" class="editor" placeholder="Start writing here… (auto-saved locally; never uploaded)"></textarea>
+        <textarea id="editor" class="editor" placeholder="Start writing here…"></textarea>
         
         <!-- Task popup card -->
         <div class="task-popup" id="taskPopup">
@@ -337,7 +337,9 @@
       <p>In this task, you will work with eight different LLM writing models to complete a series of writing tasks.</p>
       <p>The writing tasks will appear in the bottom-right corner of the screen. Please make sure to <strong>rely on AI assistance as MUCH as possible</strong> when completing your writing.</p>
       <p>You may ask the AI to generate the content you need and then copy and paste it into your response. However, not all models will support copy–paste. In those cases, you should draw on the AI's ideas and rephrase them in your own words.</p>
-      <p>Your responses should be written in English and should contain approximately <strong>50–80 words</strong>.</p>
+      <p>Your responses should be written in English and should contain approximately <strong>50–80 words</strong>. 
+        They must be written in complete sentences and organized into coherent paragraphs rather than bullet points. 
+        Please ensure your writing is clear, logically structured, and supported with relevant reasoning or examples where possible.</p>
       <button class="welcome-close-btn" id="welcomeCloseBtn">Start Task 1</button>
     </div>
   </div>
@@ -349,7 +351,7 @@
     const stat = document.getElementById('stat');
     const copyBtn = document.getElementById('copyBtn');
     const downloadBtn = document.getElementById('downloadBtn');
-    const clearBtn = document.getElementById('clearBtn');
+    // const clearBtn = document.getElementById('clearBtn');
     const fontSizeSel = document.getElementById('fontSize');
 
     // Restore draft & font size
@@ -439,12 +441,12 @@
     });
 
     // Clear
-    clearBtn.addEventListener('click', () => {
-      if (!confirm('Clear all text? This cannot be undone.')) return;
-      editor.value = '';
-      localStorage.removeItem(KEY);
-      updateStat();
-    });
+    // clearBtn.addEventListener('click', () => {
+    //   if (!confirm('Clear all text? This cannot be undone.')) return;
+    //   editor.value = '';
+    //   localStorage.removeItem(KEY);
+    //   updateStat();
+    // });
 
     // Font size
     fontSizeSel.addEventListener('change', () => {

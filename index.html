@@ -118,7 +118,7 @@
       <input type="number" id="participantId" placeholder="Enter your participant ID" required>
     </div>
     
-    <div class="form-group">
+    <!-- <div class="form-group">
       <label for="experimentCondition">Condition:</label>
       <select id="experimentCondition" required>
         <option value="">Select a Condition...</option>
@@ -131,7 +131,7 @@
         <option value="6">G, H, F, A, E, B, D, C</option>
         <option value="7">H, A, G, B, F, C, E, D</option>
       </select>
-    </div>
+    </div> -->
     
     <button class="btn" id="continueBtn">Continue</button>
   </div>
@@ -140,7 +140,7 @@
   <div id="studyLinks" class="study-links">
     <div class="participant-info">
       <strong>Participant ID:</strong> <span id="displayParticipantId"></span><br>
-      <strong>Condition:</strong> <span id="displayCondition"></span>
+      <!-- <strong>Condition:</strong> <span id="displayCondition"></span> -->
       <button class="change-id" onclick="changeParticipantId()">Change ID</button>
     </div>
 
@@ -186,25 +186,27 @@
     }
 
     document.getElementById('continueBtn').addEventListener('click', setParticipantId);
+    
+    // Allow Enter key to submit
+    document.getElementById('participantId').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        setParticipantId();
+      }
+    });
   });
 
   function setParticipantId() {
     try{
       const idEl = document.getElementById('participantId');
-      const rowEl = document.getElementById('experimentCondition');
       const participantId = (idEl.value || '').trim();
-      let rowIndex = rowEl.value === '' ? null : Number(rowEl.value);
 
       if (!participantId) {
         alert('Please enter a participant ID');
         return;
       }
-      // default to Row 1 if user didn't pick a row yet
-      if (!Number.isInteger(rowIndex)) {
-        rowIndex = 0;
-        rowEl.value = '0';
-      }
 
+      // Auto-calculate row index from participant ID
+      const rowIndex = idToCol(participantId); // This gives us 0-7 based on participant ID
       const cond = phase1ConditionFor(rowIndex, participantId);
 
       ['participant_id','participant_start_time','phase1_row','phase1_condition'].forEach(key => localStorage.removeItem(key));
@@ -225,7 +227,7 @@
     document.getElementById('participantForm').style.display = 'none';
     document.getElementById('studyLinks').classList.add('show');
     document.getElementById('displayParticipantId').textContent = participantId;
-    document.getElementById('displayCondition').textContent = `${rowIndex + 1}`;
+    // Note: Condition display is commented out in HTML, so we don't need to set it
     generateTaskList(phase1Condition);
   }
 
