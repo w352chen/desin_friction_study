@@ -268,6 +268,38 @@
       color: #cbd5e0;
       cursor: not-allowed;
     }
+    
+    /* Survey link styling */
+    .survey-link {
+      display: block;
+      width: 100%;
+      background: #e6fffa;
+      color: #234e52;
+      border: 2px solid #81e6d9;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin: 16px 0;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.2s;
+      box-sizing: border-box;
+      pointer-events: auto; /* Enable clicking */
+    }
+    .survey-link:hover {
+      background: #b2f5ea;
+      border-color: #4fd1c7;
+      color: #1a202c;
+      text-decoration: none;
+    }
+    .survey-note {
+      font-size: 12px;
+      color: #718096;
+      text-align: center;
+      margin: 8px 0 16px 0;
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
@@ -509,6 +541,18 @@ const MODALS = [
   "Usage Mirror"
 ];
 
+/* ===== Survey URLs for each modal ===== */
+const SURVEY_URLS = {
+  "ChatGPT": "https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_25Jgg0bYqq4Vaf4",
+  "HoldReveal": "https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_2lfHK6k29VkZgZ8", 
+  "ThinkMultiplier": "https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_5pWUhW8SeqLL5jw",
+  "Timer Lockout": "https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_5jNCM9jydjglz7g",
+  "Elenchus": "https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_088doWGgODKupYa",
+  "Less is More": "https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_aWRqAYINfAIVlD8",
+  "Numbered Points": "https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_eahQXrB6PNt2Gai",
+  "Usage Mirror": "https://uwaterloo.ca1.qualtrics.com/jfe/form/SV_cwOYnATI9kFX302"
+};
+
 /* ===== 16 个写作主题（不含 modal）===== */
 const TOPICS = [
   "Write about crime and its common social causes.",
@@ -519,14 +563,14 @@ const TOPICS = [
   "Write about psychological factors that contribute to crime.",
   "Write about the main purposes of punishment in the justice system.",
   "Write about rehabilitation compared to punishment in criminal justice.",
-  "Write about the death penalty and reasons why some countries use it while others do not.",
-  "Write about community service as an alternative form of punishment.",
-  "Write about restorative justice and how it works.",
-  "Write about the challenges of running a prison system.",
-  "Write about the impact of crime on local communities.",
-  "Write about government investment in crime prevention programs.",
-  "Write about examples of successful crime prevention strategies.",
-  "Write about technology in preventing or solving crimes."
+  // "Write about the death penalty and reasons why some countries use it while others do not.",
+  // "Write about community service as an alternative form of punishment.",
+  // "Write about restorative justice and how it works.",
+  // "Write about the challenges of running a prison system.",
+  // "Write about the impact of crime on local communities.",
+  // "Write about government investment in crime prevention programs.",
+  // "Write about examples of successful crime prevention strategies.",
+  // "Write about technology in preventing or solving crimes."
 ];
 
 /* ===== 参与者行号：URL ?pid=0..7 或 localStorage（默认 0）===== */
@@ -600,6 +644,28 @@ const tasks = TOPICS.map((topic, idx) => {
           ul.appendChild(li);
         });
         taskDescription.appendChild(ul);
+        
+        // Add survey link for current modal
+        const currentModal = modalSequence[currentTask % modalSequence.length];
+        const surveyUrl = SURVEY_URLS[currentModal];
+        
+        if (surveyUrl && surveyUrl !== `YOUR_${currentModal.toUpperCase().replace(/\s+/g, '_')}_SURVEY_URL_HERE`) {
+          // Create survey link element
+          const surveyLink = document.createElement('a');
+          surveyLink.href = surveyUrl;
+          surveyLink.target = '_blank';
+          surveyLink.rel = 'noopener noreferrer';
+          surveyLink.className = 'survey-link';
+          surveyLink.textContent = `📋 Complete ${currentModal} Survey`;
+          
+          // Create explanatory note
+          const surveyNote = document.createElement('div');
+          surveyNote.className = 'survey-note';
+          surveyNote.textContent = 'Please complete this survey after proceeding with the writing task';
+          
+          taskDescription.appendChild(surveyLink);
+          taskDescription.appendChild(surveyNote);
+        }
 
         nextTaskBtn.style.display = 'block';
         nextTaskBtn.textContent = '→';
@@ -615,7 +681,7 @@ const tasks = TOPICS.map((topic, idx) => {
         taskNumber.textContent = 'All Tasks Completed!';
         taskTitle.style.display = 'none';
         
-        taskDescription.innerHTML = '<p style="margin: 0; color: #28a745; font-weight: 500;">🎉 Great job! You have completed all 16 writing tasks.<br><br>Click the restart button to begin again.</p>';
+        taskDescription.innerHTML = '<p style="margin: 0; color: #28a745; font-weight: 500;">🎉 Great job! You have completed all 8 writing tasks.<br><br>Click the Download .txt button to download your writing.</p>';
         
         nextTaskBtn.style.display = 'block';
         nextTaskBtn.textContent = '↺';
